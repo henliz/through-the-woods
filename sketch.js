@@ -16,6 +16,11 @@ const DIR = { down: 0, left: 1, right: 2, up: 3 };
 const P_SPEED = 4.5;
 const P_RADIUS = 10;
 
+let journal;
+
+let npc1_pg1;
+let npc1_pg2;
+
 function preload() {
   tf1Preload();
   charSheet = loadImage("redridinghood.png");
@@ -28,18 +33,21 @@ function setup() {
   tf1Setup();
 
   player = new Player();
-  player.px = 512;   // centre of 8-tile-wide room
-  player.py = 576;   // mid-floor (wall=256px tall, then floor below)
+  player.px = 512; // centre of 8-tile-wide room
+  player.py = 576; // mid-floor (wall=256px tall, then floor below)
   player.dir = DIR.down;
+
+  journal = new Journal();
 }
 
 function draw() {
   background(22, 18, 20);
 
-  updatePlayer();
-
-  camX = lerp(camX, player.px - width / 2, 0.14);
-  camY = lerp(camY, player.py - height / 2, 0.14);
+  if (!journal.isOpen) {
+    updatePlayer();
+    camX = lerp(camX, player.px - width / 2, 0.14);
+    camY = lerp(camY, player.py - height / 2, 0.14);
+  }
 
   push();
   translate(-camX, -camY);
@@ -48,21 +56,38 @@ function draw() {
   drawPlayer();
 
   pop();
+
+  drawJournalIcon();
+  journal.display();
 }
 
 function updatePlayer() {
-  let vx = 0, vy = 0;
+  let vx = 0,
+    vy = 0;
 
-  if (keyIsDown(65)) { vx -= 1; player.dir = DIR.left; }   // A
-  if (keyIsDown(68)) { vx += 1; player.dir = DIR.right; }  // D
-  if (keyIsDown(87)) { vy -= 1; player.dir = DIR.up; }     // W
-  if (keyIsDown(83)) { vy += 1; player.dir = DIR.down; }   // S
+  if (keyIsDown(65)) {
+    vx -= 1;
+    player.dir = DIR.left;
+  } // A
+  if (keyIsDown(68)) {
+    vx += 1;
+    player.dir = DIR.right;
+  } // D
+  if (keyIsDown(87)) {
+    vy -= 1;
+    player.dir = DIR.up;
+  } // W
+  if (keyIsDown(83)) {
+    vy += 1;
+    player.dir = DIR.down;
+  } // S
 
-  player.moving = (vx !== 0 || vy !== 0);
+  player.moving = vx !== 0 || vy !== 0;
 
   if (player.moving) {
     const len = Math.sqrt(vx * vx + vy * vy);
-    vx /= len; vy /= len;
+    vx /= len;
+    vy /= len;
 
     const nx = player.px + vx * P_SPEED;
     const ny = player.py + vy * P_SPEED;
@@ -111,4 +136,37 @@ function drawPlayer() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+}
+
+//journal icon
+function drawJournalIcon() {
+  fill(255);
+  rect(width - 60, 20, 40, 40);
+  fill(0);
+  textSize(14);
+  textAlign(CENTER, CENTER);
+  text("J", width - 40, 40);
+}
+
+function keyPressed() {
+  if (key === "j" || key === "J") {
+    journal.toggle();
+  }
+}
+
+function mousePressed() {
+  if (
+    mouseX > width - 60 &&
+    mouseX < width - 20 &&
+    mouseY > 20 &&
+    mouseY < 60
+  ) {
+    journal.toggle();
+    return;
+  }
+
+  if (journal.isOpen) {
+    journal.handleClick(mouseX, mouseY);
+    return;
+  }
 }
