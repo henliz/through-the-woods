@@ -1,1 +1,1 @@
-# through-the-woods
+![Through the Woods](through_the_woods_logo.png)
