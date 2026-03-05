@@ -38,5 +38,6 @@ const innkeeperDialogue = {
 };
 
 const innkeeper = new NPC(300, 400, innkeeperDialogue);
+innkeeper.journalPageIndex = 0;
 
 window.innkeeper = innkeeper;

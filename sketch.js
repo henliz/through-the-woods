@@ -26,8 +26,6 @@ let innkeeperPg;
 let fdlPg;
 let evidencePg;
 
-let innkeep3spoons;
-
 function preload() {
   tf1Preload();
   charSheet = loadImage("redridinghood.png");
@@ -39,8 +37,6 @@ function preload() {
   innkeeperPg = loadImage("journalPages/Innkeeper profile.png");
   fdlPg = loadImage("journalPages/FDL Profile.png");
   evidencePg = loadImage("journalPages/Evidence page.png");
-
-  innkeep3spoons = loadImage("journalPages/Innkeeper (+ info).png");
 }
 
 function setup() {

@@ -161,8 +161,14 @@ function confirmChoice() {
   if (spoonsRemaining < option.cost) return;
 
   spoonsRemaining -= option.cost;
-  chosenOption = option; // save what was picked
-  dialoguePhase = "response"; // advance to response phase
+  chosenOption = option;
+
+  // Add notebook entry if this option has one
+  if (option.notebookEntry && activeNPC.journalPageIndex !== undefined) {
+    journal.addTextEntry(activeNPC.journalPageIndex, option.notebookEntry);
+  }
+
+  dialoguePhase = "response";
 }
 
 function mousePressed() {
