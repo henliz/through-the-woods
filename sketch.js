@@ -26,32 +26,17 @@ let innkeeperPg;
 let fdlPg;
 let evidencePg;
 
-<<<<<<< HEAD
-=======
-let innkeep3spoons;
-
->>>>>>> 82b012256916ce10e12198d5f98da864eb2f5f7d
 function preload() {
   tf1Preload();
   charSheet = loadImage("redridinghood.png");
   spoonImg = loadImage("assets/spoon-placeholder.png");
 
   //journal pages
-<<<<<<< HEAD
-  doctorPg = loadImage("assets/Doctor profile.png");
-  rmPg = loadImage("assets/RM Profile.png");
-  innkeeperPg = loadImage("assets/Innkeeper profile.png");
-  fdlPg = loadImage("assets/FDL Profile.png");
-  evidencePg = loadImage("assets/Evidence page.png");
-=======
   doctorPg = loadImage("journalPages/Doctor profile.png");
   rmPg = loadImage("journalPages/RM Profile.png");
   innkeeperPg = loadImage("journalPages/Innkeeper profile.png");
   fdlPg = loadImage("journalPages/FDL Profile.png");
   evidencePg = loadImage("journalPages/Evidence page.png");
-
-  innkeep3spoons = loadImage("journalPages/Innkeeper (+ info).png");
->>>>>>> 82b012256916ce10e12198d5f98da864eb2f5f7d
 }
 
 function setup() {
@@ -66,7 +51,12 @@ function setup() {
   player.dir = DIR.down;
 
   journal = new Journal();
-  npcs = [innkeeper]; //array of npcs we have
+  npcs = [innkeeper, doctor, runawayMan]; //array of npcs we have
+
+  // set NPC colours here, after p5.js is ready
+  innkeeper.colour = color(255, 100, 100); // red
+  doctor.colour = color(100, 200, 255); // light blue
+  runawayMan.colour = color(100, 220, 130); // green
 }
 
 function draw() {
@@ -83,6 +73,7 @@ function draw() {
 
   tf1Draw(0, 0);
   drawPlayer();
+  //npc drawing
   for (let npc of npcs) {
     npc.draw();
   }
@@ -153,6 +144,8 @@ function circleHitsSolid(cx, cy, r) {
   for (const [px, py] of pts) {
     if (tf1IsSolidAtPixel(px, py)) return true;
   }
+
+  if (playerHitsNPC(cx, cy, r)) return true;
   return false;
 }
 
@@ -169,14 +162,10 @@ function drawPlayer() {
   imageMode(CORNER);
 }
 
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}
-
 function drawSpoonCounter() {
   let spoonSize = 36; // size of each spoon icon
   let gap = 8; // gap between spoons
-  let startX = width * 0.7; // left padding from screen edge
+  let startX = width * 0.75; // left padding from screen edge
   let startY = 20; // top padding from screen edge
 
   for (let i = 0; i < 7; i++) {
@@ -228,20 +217,7 @@ function drawPrompt() {
   }
 }
 
-//journal icon
-function drawJournalIcon() {
-  fill(255);
-  rect(width - 60, 20, 40, 40);
-  fill(0);
-  textSize(14);
-  textAlign(CENTER, CENTER);
-  text("J", width - 40, 40);
-}
-
 function keyPressed() {
-  if (key === "j" || key === "J") {
-    journal.toggle();
-  }
   if (key === "e" || key === "E") {
     if (dialoguePhase === "closed") {
       for (let npc of npcs) {
@@ -274,21 +250,8 @@ function keyPressed() {
   }
 }
 
-function mousePressed() {
-  if (
-    mouseX > width - 60 &&
-    mouseX < width - 20 &&
-    mouseY > 20 &&
-    mouseY < 60
-  ) {
-    journal.toggle();
-    return;
-  }
-
-  if (journal.isOpen) {
-    journal.handleClick(mouseX, mouseY);
-    return;
-  }
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function drawSpoonCounter() {

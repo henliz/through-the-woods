@@ -8,6 +8,7 @@ class NPC {
     this.dialogue = dialogue;
     this.firstVisit = true;
     this.interactRadius = 80;
+    //this.colour = color(255, 100, 100); // default red
   }
 
   isPlayerNearby(player) {
@@ -17,7 +18,7 @@ class NPC {
 
   draw() {
     // placeholder — just a coloured circle for now
-    fill(255, 100, 100);
+    fill(this.colour);
     noStroke();
     circle(this.x, this.y, 40);
   }

@@ -38,6 +38,14 @@ function drawDialogue() {
   rect(boxX, boxY, boxW, boxH);
 
   fill(255);
+  textSize(10);
+  text(
+    "Click 'E' to continue. Use 'W' and 'S' to hover over an option and click 'E' to select",
+    370,
+    height * 0.8 + 90,
+  );
+
+  fill(255);
   textSize(18);
   textAlign(LEFT, TOP);
 
@@ -161,8 +169,14 @@ function confirmChoice() {
   if (spoonsRemaining < option.cost) return;
 
   spoonsRemaining -= option.cost;
-  chosenOption = option; // save what was picked
-  dialoguePhase = "response"; // advance to response phase
+  chosenOption = option;
+
+  // Add notebook entry if this option has one
+  if (option.notebookEntry && activeNPC.journalPageIndex !== undefined) {
+    journal.addTextEntry(activeNPC.journalPageIndex, option.notebookEntry);
+  }
+
+  dialoguePhase = "response";
 }
 
 function mousePressed() {
