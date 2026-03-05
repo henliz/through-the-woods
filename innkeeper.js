@@ -1,3 +1,5 @@
+//this is all the information for the innkeeper
+
 const innkeeperDialogue = {
   opening:
     "Tsk, this is terrible. My inn's reputation will be ruined… What do you want, girl?",
@@ -39,5 +41,12 @@ const innkeeperDialogue = {
 
 const innkeeper = new NPC(300, 400, innkeeperDialogue);
 innkeeper.journalPageIndex = 0;
+// simple rectangular patrol loop around the bar area
+innkeeper.waypoints = [
+  { x: 300, y: 400 },
+  { x: 500, y: 400 },
+  { x: 500, y: 550 },
+  { x: 300, y: 550 },
+];
 
 window.innkeeper = innkeeper;

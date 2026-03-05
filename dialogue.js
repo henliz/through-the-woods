@@ -199,10 +199,14 @@ function mousePressed() {
 }
 
 function bedtime() {
-  if (spoonsRemaining === 0 && dialoguePhase === "closed") {
+  if (
+    (spoonsRemaining === 0 && dialoguePhase === "closed") ||
+    (spoonsRemaining === 1 && dialoguePhase === "closed")
+  ) {
     fill("black");
     rect(0, 0, width, height);
 
+    fill("white");
     textSize(13);
     text(
       "With no more spoons left to give, little Red went off to bed. A restless slumber waiting just ahead.",

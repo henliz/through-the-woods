@@ -2,6 +2,8 @@ let charSheet;
 let player;
 
 let spoonImg;
+let innkeeperImg;
+let nunImg;
 
 let camX = 0;
 let camY = 0;
@@ -26,10 +28,15 @@ let innkeeperPg;
 let fdlPg;
 let evidencePg;
 
+let currentScene = "HOME";
+
 function preload() {
   tf1Preload();
   charSheet = loadImage("redridinghood.png");
+  loadHomeAssets();
   spoonImg = loadImage("assets/spoon-placeholder.png");
+  innkeeperImg = loadImage("assets/innkeeper_sprite.png");
+  nunImg = loadImage("nuns.png");
 
   //journal pages
   doctorPg = loadImage("journalPages/Doctor profile.png");
@@ -39,6 +46,100 @@ function preload() {
   evidencePg = loadImage("journalPages/Evidence page.png");
 }
 
+// ─────────────────────────────────────────────────────────────
+// SPAWN HELPERS (guaranteed inside walkable area)
+// ─────────────────────────────────────────────────────────────
+
+function isCircleInOpenSpace(cx, cy, r) {
+  // Use the same style of checks as movement collision
+  const pts = [
+    [cx, cy],
+    [cx, cy + r],
+    [cx, cy - r],
+    [cx + r, cy],
+    [cx - r, cy],
+    [cx + r * 0.7, cy + r * 0.7],
+    [cx - r * 0.7, cy + r * 0.7],
+    [cx + r * 0.7, cy - r * 0.7],
+    [cx - r * 0.7, cy - r * 0.7],
+  ];
+  for (const [px, py] of pts) {
+    if (tf1IsSolidAtPixel(px, py)) return false;
+  }
+  return true;
+}
+
+function tooCloseToOthers(cx, cy, others, minDist) {
+  for (const o of others) {
+    const dx = cx - o.x;
+    const dy = cy - o.y;
+    if (dx * dx + dy * dy < minDist * minDist) return true;
+  }
+  return false;
+}
+
+/**
+ * Find a safe spawn pixel.
+ * - region: optional { x0, y0, x1, y1 } to bias search
+ * - r: radius for collision
+ * - avoid: array of {x,y} to keep spacing between spawns
+ */
+function findSpawnPoint({ r, region = null, avoid = [], minDist = 120 }) {
+  // These globals exist in tavernFloor1.js:
+  // TF1_W, TF1_H, TF1_T, TOTAL_WALL_H
+  const floorTopY = TOTAL_WALL_H;
+
+  const worldW = TF1_W * TF1_T;
+  const worldH = TF1_H * TF1_T;
+
+  // Default search region: whole floor area
+  const x0 = region?.x0 ?? 0;
+  const y0 = region?.y0 ?? floorTopY;
+  const x1 = region?.x1 ?? worldW;
+  const y1 = region?.y1 ?? floorTopY + worldH;
+
+  // 1) Try a bunch of random samples in the preferred region
+  for (let i = 0; i < 600; i++) {
+    const cx = random(x0 + r + 2, x1 - r - 2);
+    const cy = random(y0 + r + 2, y1 - r - 2);
+
+    if (!isCircleInOpenSpace(cx, cy, r)) continue;
+    if (tooCloseToOthers(cx, cy, avoid, minDist)) continue;
+
+    return { x: cx, y: cy };
+  }
+
+  // 2) Fallback: systematic scan across tiles (guaranteed if any floor exists)
+  const step = Math.max(16, Math.floor(TF1_T / 2)); // half-tile scan
+  for (let cy = y0 + r + 2; cy <= y1 - r - 2; cy += step) {
+    for (let cx = x0 + r + 2; cx <= x1 - r - 2; cx += step) {
+      if (!isCircleInOpenSpace(cx, cy, r)) continue;
+      if (tooCloseToOthers(cx, cy, avoid, minDist)) continue;
+      return { x: cx, y: cy };
+    }
+  }
+
+  // 3) If EVERYTHING fails, dump them somewhere reasonable (but warn in console)
+  console.warn("No valid spawn found — check TF1_SOLID/mask or wall/floor offsets.");
+  return { x: TF1_T * 2, y: floorTopY + TF1_T * 2 };
+}
+
+// Convenience: define some “zones” to bias spawns (adjust if you want)
+function getInnZones() {
+  const floorTopY = TOTAL_WALL_H;
+  const W = TF1_W * TF1_T;
+  const H = TF1_H * TF1_T;
+
+  return {
+    // roughly central / main hall
+    main: { x0: W * 0.20, x1: W * 0.80, y0: floorTopY + H * 0.25, y1: floorTopY + H * 0.70 },
+    // left-side rooms
+    left: { x0: W * 0.05, x1: W * 0.45, y0: floorTopY + H * 0.15, y1: floorTopY + H * 0.90 },
+    // right-side rooms
+    right:{ x0: W * 0.55, x1: W * 0.95, y0: floorTopY + H * 0.15, y1: floorTopY + H * 0.90 },
+  };
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noSmooth();
@@ -46,16 +147,57 @@ function setup() {
   tf1Setup();
 
   player = new Player();
-  player.px = 512; // centre of 8-tile-wide room
-  player.py = 576; // mid-floor (wall=256px tall, then floor below)
-  player.dir = DIR.down;
+    player.dir = DIR.down;
+
+    // after tf1Setup() so TF1_W/TF1_H/TF1_T exist:
+    const zones = getInnZones();
+    const used = [];
+
+    // Player spawn (main area)
+    let p = findSpawnPoint({ r: P_RADIUS, region: zones.main, avoid: used, minDist: 160 });
+    player.px = p.x;
+    player.py = p.y;
+    used.push({ x: player.px, y: player.py });
+
+    // NPC spawns (spread out)
+    let n;
+
+    // innkeeper in main (near player but not on top)
+    n = findSpawnPoint({ r: 14, region: zones.main, avoid: used, minDist: 140 });
+    innkeeper.x = n.x; innkeeper.y = n.y;
+    used.push({ x: innkeeper.x, y: innkeeper.y });
+
+    // doctor in left side
+    n = findSpawnPoint({ r: 14, region: zones.left, avoid: used, minDist: 140 });
+    doctor.x = n.x; doctor.y = n.y;
+    used.push({ x: doctor.x, y: doctor.y });
+
+    // runawayMan in right side
+    n = findSpawnPoint({ r: 14, region: zones.right, avoid: used, minDist: 140 });
+    runawayMan.x = n.x; runawayMan.y = n.y;
+    used.push({ x: runawayMan.x, y: runawayMan.y });
 
   journal = new Journal();
-  npcs = [innkeeper]; //array of npcs we have
+  npcs = [innkeeper, doctor, runawayMan]; //array of npcs we have
+
+  // set NPC colours here, after p5.js is ready
+  innkeeper.sprite = innkeeperImg;
+  innkeeper.spriteFrameW = 48;
+  innkeeper.spriteFrameH = 48;
+  doctor.sprite = nunImg;
+  doctor.spriteFrameW = 48;
+  doctor.spriteFrameH = 48;
+  runawayMan.colour = color(100, 220, 130); // green
 }
 
 function draw() {
   background(22, 18, 20);
+
+  //Home Page
+  if (currentScene === "HOME") {
+    drawHomePage();
+    return;
+  }
 
   if (!journal.isOpen) {
     updatePlayer();
@@ -69,6 +211,7 @@ function draw() {
   tf1Draw(0, 0);
   drawPlayer();
   for (let npc of npcs) {
+    npc.update();
     npc.draw();
   }
   pop();
@@ -139,6 +282,8 @@ function circleHitsSolid(cx, cy, r) {
   for (const [px, py] of pts) {
     if (tf1IsSolidAtPixel(px, py)) return true;
   }
+
+  if (playerHitsNPC(cx, cy, r)) return true;
   return false;
 }
 
@@ -225,6 +370,13 @@ function drawJournalIcon() {
 }
 
 function keyPressed() {
+  // START SCREEN
+  if (currentScene === "HOME") {
+    if (keyCode === ENTER) {
+      currentScene = "GAME";
+    }
+    return;
+  }
   if (key === "j" || key === "J") {
     journal.toggle();
   }
