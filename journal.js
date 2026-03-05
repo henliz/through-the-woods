@@ -11,11 +11,11 @@ class Journal {
 
     // Data storage array
     this.pages = [
-      { title: "NPC 1", entries: [] },
-      { title: "NPC 2", entries: [] },
-      { title: "NPC 3", entries: [] },
-      { title: "NPC 4", entries: [] },
-      { title: "Evidence", entries: [] },
+      { title: "NPC 1", entries: [fdlPg] },
+      { title: "NPC 2", entries: [doctorPg] },
+      { title: "NPC 3", entries: [rmPg] },
+      { title: "NPC 4", entries: [innkeeperPg] },
+      { title: "Evidence", entries: [evidencePg] },
     ];
   }
 
@@ -44,16 +44,6 @@ class Journal {
   //journal
   display() {
     if (!this.isOpen) return;
-
-    // Background
-    fill(240);
-    rect(100, 50, width - 200, height - 100);
-
-    // Title (delete later)
-    fill(0);
-    textSize(24);
-    textAlign(CENTER);
-    text(this.pages[this.openPage].title, width / 2, 100);
 
     // Entries
     textSize(16);
