@@ -184,8 +184,8 @@ function mousePressed() {
 
   let btnW = width * 0.28;
   let btnH = height * 0.07;
-  let btnX = width * 0.68;
-  let startY = height * 0.54;
+  let btnX = width * 0.6;
+  let startY = height * 0.4;
   let gap = btnH + 10;
 
   for (let i = 0; i < 3; i++) {
@@ -197,7 +197,25 @@ function mousePressed() {
   }
 }
 
+function bedtime() {
+  if (spoonsRemaining === 0 && dialoguePhase === "closed") {
+    fill("black");
+    rect(0, 0, width, height);
+
+    textSize(13);
+    text(
+      "With no more spoons left to give, little Red went off to bed. A restless slumber waiting just ahead.",
+      width / 2,
+      height / 2,
+    );
+
+    textSize(20);
+    text("DAY 1 OVER", width / 2, height / 2 + 40);
+  }
+}
+
 window.openDialogue = openDialogue;
 window.closeDialogue = closeDialogue;
 window.drawDialogue = drawDialogue;
 window.dialoguePhase = dialoguePhase;
+window.bedtime = bedtime;
