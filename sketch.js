@@ -3,6 +3,7 @@ let player;
 
 let spoonImg;
 let innkeeperImg;
+let nunImg;
 
 let camX = 0;
 let camY = 0;
@@ -35,6 +36,7 @@ function preload() {
   loadHomeAssets();
   spoonImg = loadImage("assets/spoon-placeholder.png");
   innkeeperImg = loadImage("assets/innkeeper_sprite.png");
+  nunImg = loadImage("nuns.png");
 
   //journal pages
   doctorPg = loadImage("journalPages/Doctor profile.png");
@@ -62,7 +64,9 @@ function setup() {
   innkeeper.sprite = innkeeperImg;
   innkeeper.spriteFrameW = 48;
   innkeeper.spriteFrameH = 48;
-  doctor.colour = color(100, 200, 255); // light blue
+  doctor.sprite = nunImg;
+  doctor.spriteFrameW = 48;
+  doctor.spriteFrameH = 48;
   runawayMan.colour = color(100, 220, 130); // green
 }
 

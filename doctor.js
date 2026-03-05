@@ -33,7 +33,13 @@ const doctorDialogue = {
   ],
 };
 
-const doctor = new NPC(500, 400, doctorDialogue);
+const doctor = new NPC(600, 450, doctorDialogue);
 doctor.journalPageIndex = 1;
+doctor.waypoints = [
+  { x: 600, y: 450 },
+  { x: 800, y: 450 },
+  { x: 800, y: 600 },
+  { x: 600, y: 600 },
+];
 
 window.doctor = doctor;
