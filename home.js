@@ -28,9 +28,13 @@ function drawHomePage() {
 
   // bg drawn slightly oversized so parallax doesn't show edges
   const oversize = 60;
-  image(homeBgImg,
-    -oversize / 2 + bgShiftX, -oversize / 2 + bgShiftY,
-    width + oversize, height + oversize);
+  image(
+    homeBgImg,
+    -oversize / 2 + bgShiftX,
+    -oversize / 2 + bgShiftY,
+    width + oversize,
+    height + oversize,
+  );
 
   // black gradient — full black at top, transparent at 50% down
   const grad = drawingContext.createLinearGradient(0, 0, 0, height * 0.5);
@@ -44,19 +48,25 @@ function drawHomePage() {
     const logoW = min(width * 0.72, 880);
     const logoH = logoW * (logoImg.height / logoImg.width);
     imageMode(CENTER);
-    image(logoImg, width / 2 + logoShiftX, height * 0.28 + logoShiftY, logoW, logoH);
+    image(
+      logoImg,
+      width / 2 + logoShiftX,
+      height * 0.28 + logoShiftY,
+      logoW,
+      logoH,
+    );
     imageMode(CORNER);
   }
 
   textAlign(CENTER, CENTER);
   textSize(16);
   fill(220);
-  text("Press ENTER to start", width / 2, height * 0.5);
+  text("Press ENTER to start", width / 2, height * 0.5 - 20);
 
   const boxWidth = min(650, width * 0.85);
   const boxHeight = 320;
   const boxX = (width - boxWidth) / 2;
-  const boxY = height * 0.45;
+  const boxY = height * 0.45 + 50;
 
   noStroke();
   fill(255, 255, 255, 30);

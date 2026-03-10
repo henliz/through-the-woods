@@ -29,6 +29,7 @@ let fdlPg;
 let evidencePg;
 
 let currentScene = "HOME";
+let journalicon;
 
 function preload() {
   tf1Preload();
@@ -45,6 +46,7 @@ function preload() {
   innkeeperPg = loadImage("journalPages/Innkeeper profile.png");
   fdlPg = loadImage("journalPages/FDL Profile.png");
   evidencePg = loadImage("journalPages/Evidence page.png");
+  journalicon = loadImage("assets/bookicon.png");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -127,9 +129,9 @@ function getInnZones() {
   const H = TF1_H * TF1_T;
 
   return {
-    main:  { x0: W * 0.20, x1: W * 0.80, y0: H * 0.25, y1: H * 0.70 },
-    left:  { x0: W * 0.05, x1: W * 0.45, y0: H * 0.15, y1: H * 0.90 },
-    right: { x0: W * 0.55, x1: W * 0.95, y0: H * 0.15, y1: H * 0.90 },
+    main: { x0: W * 0.2, x1: W * 0.8, y0: H * 0.25, y1: H * 0.7 },
+    left: { x0: W * 0.05, x1: W * 0.45, y0: H * 0.15, y1: H * 0.9 },
+    right: { x0: W * 0.55, x1: W * 0.95, y0: H * 0.15, y1: H * 0.9 },
   };
 }
 
@@ -140,35 +142,43 @@ function setup() {
   tf1Setup();
 
   player = new Player();
-    player.dir = DIR.down;
+  player.dir = DIR.down;
 
-    // after tf1Setup() so TF1_W/TF1_H/TF1_T exist:
-    const zones = getInnZones();
-    const used = [];
+  // after tf1Setup() so TF1_W/TF1_H/TF1_T exist:
+  const zones = getInnZones();
+  const used = [];
 
-    // Player spawn (main area)
-    let p = findSpawnPoint({ r: P_RADIUS, region: zones.main, avoid: used, minDist: 160 });
-    player.px = p.x;
-    player.py = p.y;
-    used.push({ x: player.px, y: player.py });
+  // Player spawn (main area)
+  let p = findSpawnPoint({
+    r: P_RADIUS,
+    region: zones.main,
+    avoid: used,
+    minDist: 160,
+  });
+  player.px = p.x;
+  player.py = p.y;
+  used.push({ x: player.px, y: player.py });
 
-    // NPC spawns (spread out)
-    let n;
+  // NPC spawns (spread out)
+  let n;
 
-    // innkeeper in main (near player but not on top)
-    n = findSpawnPoint({ r: 14, region: zones.main, avoid: used, minDist: 140 });
-    innkeeper.x = n.x; innkeeper.y = n.y;
-    used.push({ x: innkeeper.x, y: innkeeper.y });
+  // innkeeper in main (near player but not on top)
+  n = findSpawnPoint({ r: 14, region: zones.main, avoid: used, minDist: 140 });
+  innkeeper.x = n.x;
+  innkeeper.y = n.y;
+  used.push({ x: innkeeper.x, y: innkeeper.y });
 
-    // doctor in left side
-    n = findSpawnPoint({ r: 14, region: zones.left, avoid: used, minDist: 140 });
-    doctor.x = n.x; doctor.y = n.y;
-    used.push({ x: doctor.x, y: doctor.y });
+  // doctor in left side
+  n = findSpawnPoint({ r: 14, region: zones.left, avoid: used, minDist: 140 });
+  doctor.x = n.x;
+  doctor.y = n.y;
+  used.push({ x: doctor.x, y: doctor.y });
 
-    // runawayMan in right side
-    n = findSpawnPoint({ r: 14, region: zones.right, avoid: used, minDist: 140 });
-    runawayMan.x = n.x; runawayMan.y = n.y;
-    used.push({ x: runawayMan.x, y: runawayMan.y });
+  // runawayMan in right side
+  n = findSpawnPoint({ r: 14, region: zones.right, avoid: used, minDist: 140 });
+  runawayMan.x = n.x;
+  runawayMan.y = n.y;
+  used.push({ x: runawayMan.x, y: runawayMan.y });
 
   journal = new Journal();
   npcs = [innkeeper, doctor, runawayMan]; //array of npcs we have
@@ -355,12 +365,18 @@ function drawPrompt() {
 
 //journal icon
 function drawJournalIcon() {
-  fill(255);
-  rect(width - 60, 20, 40, 40);
-  fill(0);
-  textSize(14);
-  textAlign(CENTER, CENTER);
-  text("J", width - 40, 40);
+  const ix = width - 60,
+    iy = 20,
+    iw = 40,
+    ih = 40;
+
+  image(journalicon, ix, iy, iw, ih);
+
+  if (journal.hasUnread) {
+    noStroke();
+    fill(210, 50, 50);
+    ellipse(ix + 5, iy + 5, 14, 14);
+  }
 }
 
 function keyPressed() {
@@ -374,6 +390,18 @@ function keyPressed() {
   if (key === "j" || key === "J") {
     journal.toggle();
   }
+
+  if (journal.isOpen) {
+    if (keyCode === LEFT_ARROW || key === "a" || key === "A") {
+      journal.prevPage();
+      return;
+    }
+    if (keyCode === RIGHT_ARROW || key === "d" || key === "D") {
+      journal.nextPage();
+      return;
+    }
+  }
+
   if (key === "e" || key === "E") {
     if (dialoguePhase === "closed") {
       for (let npc of npcs) {

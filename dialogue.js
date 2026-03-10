@@ -39,9 +39,10 @@ function drawDialogue() {
 
   fill(255);
   textSize(10);
+  textAlign(LEFT, TOP);
   text(
     "Click 'E' to continue. Use 'W' and 'S' to hover over an option and click 'E' to select",
-    370,
+    boxX + 30,
     height * 0.8 + 90,
   );
 

@@ -1,7 +1,3 @@
-//have each page as a image
-//hold all images in the array
-//when player clicks a choice that array number is called
-
 class Journal {
   constructor() {
     this.isOpen = false;
@@ -9,53 +5,78 @@ class Journal {
     this.totalPages = 5;
 
     this.pages = [
-      { title: "Innkeeper", baseImage: innkeeperPg, textEntries: [] },
-      { title: "Doctor", baseImage: doctorPg, textEntries: [] },
-      { title: "RM", baseImage: rmPg, textEntries: [] },
-      { title: "FDL", baseImage: fdlPg, textEntries: [] },
-      { title: "Evidence", baseImage: evidencePg, textEntries: [] },
+      {
+        title: "Innkeeper",
+        baseImage: innkeeperPg,
+        textEntries: [],
+        hasNew: false,
+      },
+      { title: "Doctor", baseImage: doctorPg, textEntries: [], hasNew: false },
+      { title: "RM", baseImage: rmPg, textEntries: [], hasNew: false },
+      { title: "FDL", baseImage: fdlPg, textEntries: [], hasNew: false },
+      {
+        title: "Evidence",
+        baseImage: evidencePg,
+        textEntries: [],
+        hasNew: false,
+      },
     ];
+
+    this.hasUnread = false;
   }
 
   toggle() {
     this.isOpen = !this.isOpen;
+    if (this.isOpen) {
+      this.pages[this.openPage].hasNew = false;
+      this._recalcUnread();
+    }
   }
 
   nextPage() {
-    if (this.openPage < this.totalPages - 1) this.openPage++;
-  }
-  prevPage() {
-    if (this.openPage > 0) this.openPage--;
+    if (this.openPage < this.totalPages - 1) {
+      this.openPage++;
+      this.pages[this.openPage].hasNew = false;
+      this._recalcUnread();
+    }
   }
 
-  // Called when player picks a dialogue option with a notebookEntry
+  prevPage() {
+    if (this.openPage > 0) {
+      this.openPage--;
+      this.pages[this.openPage].hasNew = false;
+      this._recalcUnread();
+    }
+  }
+
   addTextEntry(pageIndex, text) {
     this.pages[pageIndex].textEntries.push(text);
+    this.pages[pageIndex].hasNew = true;
+    this._recalcUnread();
+  }
+
+  _recalcUnread() {
+    this.hasUnread = this.pages.some((p) => p.hasNew);
   }
 
   display() {
     if (!this.isOpen) return;
 
     let page = this.pages[this.openPage];
-
-    // Draw the base profile image as the page background
     image(page.baseImage, 100, 50, width - 200, height - 100);
 
-    // Draw any unlocked text entries on top of the page
     if (page.textEntries.length > 0) {
       let entryX = 750;
-      let entryY = height * 0.62; // position entries in the lower portion of the page
+      let entryY = 250;
       let entryW = width - 260;
 
       fill(40, 20, 10);
       textSize(14);
       textAlign(LEFT, TOP);
       textStyle(ITALIC);
-
       for (let i = 0; i < page.textEntries.length; i++) {
         text("• " + page.textEntries[i], entryX, entryY + i * 30, entryW, 28);
       }
-
       textStyle(NORMAL);
     }
 
@@ -63,15 +84,22 @@ class Journal {
   }
 
   drawArrows() {
-    fill(200);
     noStroke();
-    rect(110, height / 2, 30, 30);
-    rect(width - 140, height / 2, 30, 30);
 
-    fill(80);
+    fill(this.openPage > 0 ? color(160, 120, 80) : color(100, 100, 100, 60));
+    rect(110, height / 2, 30, 30, 4);
+    fill(this.openPage > 0 ? 255 : 150);
     textSize(18);
     textAlign(CENTER, CENTER);
     text("‹", 125, height / 2 + 15);
+
+    fill(
+      this.openPage < this.totalPages - 1
+        ? color(160, 120, 80)
+        : color(100, 100, 100, 60),
+    );
+    rect(width - 140, height / 2, 30, 30, 4);
+    fill(this.openPage < this.totalPages - 1 ? 255 : 150);
     text("›", width - 125, height / 2 + 15);
   }
 
