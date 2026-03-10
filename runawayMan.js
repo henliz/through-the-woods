@@ -1,6 +1,7 @@
 const runawayManDialogue = {
   opening: "Everyone's on edge… what do you want?",
   repeatLine: "…I already said what I had to say.",
+  hesitationLine: "I can't deal with his attitude right now, not like this…",
   options: [
     {
       id: "A",

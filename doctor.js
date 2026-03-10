@@ -1,6 +1,7 @@
 const doctorDialogue = {
   opening: "Oh hi. Sorry, I'm still trying to process what happened.",
   repeatLine: "I don't really have anything else to say right now.",
+  hesitationLine: "I'm too drained to approach her right now…",
   options: [
     {
       id: "A",

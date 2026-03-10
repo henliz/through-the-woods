@@ -1,10 +1,12 @@
 //this is all the information for the innkeeper
 
 const innkeeperDialogue = {
+  name: "Innkeeper",
   opening:
     "Tsk, this is terrible. My inn's reputation will be ruined… What do you want, girl?",
   repeatLine:
     "I'm busy. Don't bother me unless you have something useful to say.",
+  hesitationLine: "I don't have the energy to deal with them right now…",
   options: [
     {
       id: "A",
@@ -41,6 +43,9 @@ const innkeeperDialogue = {
 
 const innkeeper = new NPC(300, 400, innkeeperDialogue);
 innkeeper.journalPageIndex = 0;
+innkeeper.portraitKey = "innkeeper"; // matches the key in the portraits object
+innkeeper.currentEmotion = "idle"; // default emotion, can be changed later
+
 // simple rectangular patrol loop around the bar area
 innkeeper.waypoints = [
   { x: 300, y: 400 },

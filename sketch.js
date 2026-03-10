@@ -28,6 +28,8 @@ let innkeeperPg;
 let fdlPg;
 let evidencePg;
 
+let portraits = {}; // for dialogue portraits
+
 let currentScene = "HOME";
 let journalicon;
 
@@ -40,12 +42,32 @@ function preload() {
   innkeeperImg = loadImage("assets/innkeeper_sprite.png");
   nunImg = loadImage("nuns.png");
 
-  //journal pages
+  // journal pages
   doctorPg = loadImage("journalPages/Doctor profile.png");
   rmPg = loadImage("journalPages/RM Profile.png");
   innkeeperPg = loadImage("journalPages/Innkeeper profile.png");
   fdlPg = loadImage("journalPages/FDL Profile.png");
   evidencePg = loadImage("journalPages/Evidence page.png");
+
+  // character portraits
+  portraits = {
+    innkeeper: {
+      idle: loadImage("assets/portraits/IK_Idle.png"),
+      angry: loadImage("assets/portraits/IK_angry.png"),
+      nervous: loadImage("assets/portraits/IK_Nervous.png"),
+      sus: loadImage("assets/portraits/IK_Sus.png"),
+      happy: loadImage("assets/portraits/IK_happy.png"),
+    },
+    littleRed: {
+      idle: loadImage("assets/portraits/LR_Idle.png"),
+      nervous: loadImage("assets/portraits/LR_Nervous.png"),
+      happy: loadImage("assets/portraits/LR_Happy.png"),
+      determined: loadImage("assets/portraits/LR_Determined.png"),
+    },
+    // doctor and runawayMan portraits go here when ready:
+    // doctor: { idle: loadImage("assets/portraits/DR_Idle.png"), ... },
+    // runawayMan: { idle: loadImage("assets/portraits/RM_Idle.png"), ... },
+  };
   journalicon = loadImage("assets/bookicon.png");
 }
 
@@ -342,7 +364,7 @@ function drawPrompt() {
       let screenY = npc.y - camY;
 
       // draw a small dark pill-shaped box above the NPC
-      let msg = "Press E to talk";
+      let msg = "Press Enter to talk";
       textSize(13);
       let msgW = textWidth(msg) + 20;
       let msgH = 24;
@@ -387,10 +409,12 @@ function keyPressed() {
     }
     return;
   }
+
   if (key === "j" || key === "J") {
     journal.toggle();
   }
 
+  if (keyCode === ENTER) {
   if (journal.isOpen) {
     if (keyCode === LEFT_ARROW || key === "a" || key === "A") {
       journal.prevPage();
@@ -411,25 +435,52 @@ function keyPressed() {
         }
       }
     } else if (dialoguePhase === "opening") {
-      dialoguePhase = "choosing"; // E advances from opening to choices
+      dialoguePhase = "choosing";
     } else if (dialoguePhase === "choosing") {
-      confirmChoice(); // E confirms the highlighted option
-    } else if (dialoguePhase === "response") {
-      dialoguePhase = "monologue"; // E advances to internal monologue next
-    } else if (dialoguePhase === "monologue") {
-      closeDialogue(); // E closes dialogue after internal monologue
+      confirmChoice();
     } else if (dialoguePhase === "repeat") {
-      closeDialogue(); // E just closes the one-liner
+      if (spoonsRemaining === 0) {
+        closeDialogue();
+      } else {
+        dialoguePhase = "repeat-choosing";
+      }
+    } else if (dialoguePhase === "repeat-choosing") {
+      confirmChoice();
+    } else if (dialoguePhase === "response") {
+      dialoguePhase = "monologue";
+    } else if (dialoguePhase === "monologue") {
+      if (!chosenOption) {
+        closeDialogue();
+      } else if (
+        spoonsRemaining === 0 ||
+        chosenOption.cost === 0 ||
+        chosenOption.cost === -1
+      ) {
+        closeDialogue();
+      } else {
+        dialoguePhase = "repeat";
+      }
+    } else if (dialoguePhase === "hesitation") {
+      closeDialogue();
     }
   }
 
   // navigate buttons with W / S
-  if (dialoguePhase === "choosing") {
+  if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
+    let visibleIndices = getVisibleOptionIndices();
+    if (visibleIndices.length === 0) return;
+
+    let currentPos = visibleIndices.indexOf(selectedOption);
+    if (currentPos === -1) currentPos = 0;
+
     if (key === "w" || key === "W") {
-      selectedOption = (selectedOption - 1 + 3) % 3; // wrap up
+      let newPos =
+        (currentPos - 1 + visibleIndices.length) % visibleIndices.length;
+      selectedOption = visibleIndices[newPos];
     }
     if (key === "s" || key === "S") {
-      selectedOption = (selectedOption + 1) % 3; // wrap down
+      let newPos = (currentPos + 1) % visibleIndices.length;
+      selectedOption = visibleIndices[newPos];
     }
   }
 }
@@ -448,5 +499,23 @@ function mousePressed() {
   if (journal.isOpen) {
     journal.handleClick(mouseX, mouseY);
     return;
+  }
+
+  // handle dialogue option clicks
+  if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
+    let btnW = width * 0.28;
+    let btnH = height * 0.07;
+    let btnX = width * 0.6;
+    let startY = height * 0.4;
+    let gap = btnH + 10;
+
+    for (let i = 0; i < 3; i++) {
+      let btnY = startY + i * gap;
+      if (isMouseOver(btnX, btnY, btnW, btnH)) {
+        selectedOption = i;
+        confirmChoice(); // works for both affordable and unaffordable
+        return;
+      }
+    }
   }
 }

@@ -8,13 +8,14 @@ class NPC {
     this.dialogue = dialogue;
     this.firstVisit = true;
     this.interactRadius = 80;
+    this.usedOptions = []; // options tracker
 
     // patrol
-    this.waypoints = null;      // set to [{x,y}, ...] to enable patrolling
+    this.waypoints = null; // set to [{x,y}, ...] to enable patrolling
     this.waypointIndex = 0;
     this.patrolSpeed = 1.2;
     this.moving = false;
-    this.dir = 0;               // 0 = down (DIR loads later in sketch.js)
+    this.dir = 0; // 0 = down (DIR loads later in sketch.js)
     this.frame = 0;
     this.animTimer = 0;
   }
@@ -74,9 +75,17 @@ class NPC {
       const sx = animCol * fw;
       const sy = this.dir * fh;
       imageMode(CENTER);
-      image(this.sprite, this.x, this.y - 8,
-            fw * CHAR_SCALE, fh * CHAR_SCALE,
-            sx, sy, fw, fh);
+      image(
+        this.sprite,
+        this.x,
+        this.y - 8,
+        fw * CHAR_SCALE,
+        fh * CHAR_SCALE,
+        sx,
+        sy,
+        fw,
+        fh,
+      );
       imageMode(CORNER);
     } else {
       fill(this.colour);
