@@ -29,6 +29,7 @@ let fdlPg;
 let evidencePg;
 
 let currentScene = "HOME";
+let journalicon;
 
 function preload() {
   tf1Preload();
@@ -45,6 +46,7 @@ function preload() {
   innkeeperPg = loadImage("journalPages/Innkeeper profile.png");
   fdlPg = loadImage("journalPages/FDL Profile.png");
   evidencePg = loadImage("journalPages/Evidence page.png");
+  journalicon = loadImage("assets/bookicon.png");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -367,17 +369,13 @@ function drawJournalIcon() {
     iy = 20,
     iw = 40,
     ih = 40;
-  fill(255);
-  rect(ix, iy, iw, ih);
-  fill(0);
-  textSize(14);
-  textAlign(CENTER, CENTER);
-  text("J", ix + iw / 2, iy + ih / 2);
+
+  image(journalicon, ix, iy, iw, ih);
 
   if (journal.hasUnread) {
     noStroke();
     fill(210, 50, 50);
-    ellipse(ix, iy, 14, 14);
+    ellipse(ix + 5, iy + 5, 14, 14);
   }
 }
 
