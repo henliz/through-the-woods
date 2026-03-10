@@ -414,7 +414,6 @@ function keyPressed() {
     journal.toggle();
   }
 
-  if (keyCode === ENTER) {
   if (journal.isOpen) {
     if (keyCode === LEFT_ARROW || key === "a" || key === "A") {
       journal.prevPage();
@@ -426,7 +425,7 @@ function keyPressed() {
     }
   }
 
-  if (key === "e" || key === "E") {
+  if (keyCode === ENTER) {
     if (dialoguePhase === "closed") {
       for (let npc of npcs) {
         if (npc.isPlayerNearby(player)) {
