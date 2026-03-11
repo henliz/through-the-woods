@@ -20,28 +20,92 @@ const CLUTTER = []; // will hold placed props
  */
 const clutterAssetList = [
   {
-    key: "table",
-    path: "assets/table-1.png",
+    key: "table1",
+    path: "assets/table-2.png",
   },
   {
-    key: "chair",
-    path: "assets/chair-1.png",
+    key: "counter1",
+    path: "assets/counter-4.png",
   },
   {
-    key: "lamp",
-    path: "assets/lamp-1.png",
+    key: "bigtable1",
+    path: "assets/bigtable-5.png",
   },
   {
-    key: "crate",
-    path: "Epic RPG World - Village(interiors) V1.3/assets/furniture_and_props_sprites/crates_0.png",
+    key: "pillar",
+    path: "assets/pillar-2.png",
+  },
+  {
+    key: "bed1",
+    path: "assets/bed-1.png",
+  },
+  {
+    key: "bed2",
+    path: "assets/bed-2.png",
+  },
+  {
+    key: "bed3",
+    path: "assets/bed-3.png",
+  },
+  {
+    key: "sofa1",
+    path: "assets/sofa-2.png",
   },
 ];
 
 const roomLayout = [
-  { asset: "table", tileX: 6, tileY: 5, scale: 4, anchor: "bottom" },
-  { asset: "chair", tileX: 8, tileY: 5, scale: 4, anchor: "bottom" },
-  { asset: "lamp", tileX: 10, tileY: 4, scale: 4, anchor: "bottom" },
-  { asset: "crate", tileX: 12, tileY: 6, scale: 4, anchor: "bottom" },
+  { asset: "table1", tileX: 3, tileY: 7.5, scale: 4, anchor: "top-left" },
+  {
+    asset: "counter1",
+    tileX: 11,
+    tileY: 8,
+    scale: 4,
+    anchor: "top-right",
+    rotation: 90,
+  },
+  {
+    asset: "bigtable1",
+    tileX: 3,
+    tileY: 13,
+    scale: 6,
+    anchor: "top-left",
+  },
+  {
+    asset: "pillar",
+    tileX: 12,
+    tileY: 8,
+    scale: 3,
+    anchor: "bottom",
+    rotation: 45,
+  },
+  {
+    asset: "bed1",
+    tileX: 1.6,
+    tileY: 4.2,
+    scale: 5,
+    anchor: "top-left",
+  },
+  {
+    asset: "bed2",
+    tileX: 12,
+    tileY: 0.7,
+    scale: 5,
+    anchor: "bottom",
+  },
+  {
+    asset: "bed3",
+    tileX: 2.6,
+    tileY: 0.7,
+    scale: 5,
+    anchor: "bottom",
+  },
+  {
+    asset: "sofa1",
+    tileX: 8,
+    tileY: 6,
+    scale: 5,
+    anchor: "top-left",
+  },
 ];
 
 // ============================================================
@@ -67,37 +131,21 @@ function clutterSetup() {
   // Clear previous clutter
   CLUTTER.length = 0;
 
-  // Place multiple props in the tavern scene
-  CLUTTER.push(
-    {
-      img: clutterImages.table,
-      tileX: 6,
-      tileY: 5,
-      scale: window.TF1_SCALE ?? 4,
-      anchor: "bottom",
-    },
-    {
-      img: clutterImages.chair,
-      tileX: 8,
-      tileY: 5,
-      scale: window.TF1_SCALE ?? 4,
-      anchor: "bottom",
-    },
-    {
-      img: clutterImages.lamp,
-      tileX: 10,
-      tileY: 4,
-      scale: window.TF1_SCALE ?? 4,
-      anchor: "bottom",
-    },
-    {
-      img: clutterImages.crate,
-      tileX: 12,
-      tileY: 6,
-      scale: window.TF1_SCALE ?? 4,
-      anchor: "bottom",
-    },
-  );
+  // Place props from roomLayout
+  for (const item of roomLayout) {
+    const img = clutterImages[item.asset];
+    if (!img) {
+      console.warn(`Image for ${item.asset} not loaded`);
+      continue;
+    }
+    CLUTTER.push({
+      img: img,
+      tileX: item.tileX,
+      tileY: item.tileY,
+      scale: window.TF1_SCALE ?? item.scale ?? 4,
+      anchor: item.anchor || "bottom",
+    });
+  }
 }
 
 // ============================================================

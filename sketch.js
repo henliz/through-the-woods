@@ -162,6 +162,8 @@ function setup() {
   noSmooth();
 
   tf1Setup();
+  // once the floor/tile system exists we can place our furniture
+  clutterSetup();
 
   player = new Player();
   player.dir = DIR.down;
