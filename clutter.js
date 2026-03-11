@@ -48,6 +48,10 @@ const clutterAssetList = [
     path: "assets/bed-4.png",
   },
   {
+    key: "bed4",
+    path: "assets/bed-5.png",
+  },
+  {
     key: "sofa1",
     path: "assets/walls/sofa-1.png",
   },
@@ -86,6 +90,22 @@ const clutterAssetList = [
   {
     key: "bigtable2",
     path: "assets/bigtable-2.png",
+  },
+  {
+    key: "shelf3",
+    path: "assets/shelf-3.png",
+  },
+  {
+    key: "cabinet1",
+    path: "assets/cabinet.png",
+  },
+  {
+    key: "plant1",
+    path: "assets/plant-1.png",
+  },
+  {
+    key: "door1",
+    path: "assets/door-1.png",
   },
 ];
 
@@ -134,6 +154,13 @@ const roomLayout = [
     tileY: 0.6,
     scale: 5,
     anchor: "bottom",
+  },
+  {
+    asset: "bed4",
+    tileX: 12.8,
+    tileY: 4.2,
+    scale: 6,
+    anchor: "top-left",
   },
   {
     asset: "sofa1",
@@ -203,6 +230,34 @@ const roomLayout = [
     tileX: 2.8,
     tileY: 3.6,
     scale: 4,
+    anchor: "bottom",
+  },
+  {
+    asset: "shelf3",
+    tileX: 10.4,
+    tileY: 0,
+    scale: 6,
+    anchor: "bottom",
+  },
+  {
+    asset: "cabinet1",
+    tileX: 12,
+    tileY: 3.6,
+    scale: 4,
+    anchor: "bottom",
+  },
+  {
+    asset: "plant1",
+    tileX: 10.4,
+    tileY: 12,
+    scale: 5,
+    anchor: "top-left",
+  },
+  {
+    asset: "door1",
+    tileX: 7.3,
+    tileY: 1.3,
+    scale: 5,
     anchor: "bottom",
   },
 ];
