@@ -21,7 +21,7 @@ const CLUTTER = []; // will hold placed props
 const clutterAssetList = [
   {
     key: "table1",
-    path: "assets/table-2.png",
+    path: "assets/table-3.png",
   },
   {
     key: "counter1",
@@ -45,11 +45,47 @@ const clutterAssetList = [
   },
   {
     key: "bed3",
-    path: "assets/bed-3.png",
+    path: "assets/bed-4.png",
   },
   {
     key: "sofa1",
-    path: "assets/sofa-2.png",
+    path: "assets/walls/sofa-1.png",
+  },
+  {
+    key: "piano",
+    path: "assets/Piano.png",
+  },
+  {
+    key: "pianochair1",
+    path: "assets/pianochair.png",
+  },
+  {
+    key: "shelf1",
+    path: "assets/shelf-1.png",
+  },
+  {
+    key: "sofa2",
+    path: "assets/walls/sofa-3.png",
+  },
+  {
+    key: "stool1",
+    path: "assets/stool-1.png",
+  },
+  {
+    key: "stool2",
+    path: "assets/stool-2.png",
+  },
+  {
+    key: "stool3",
+    path: "assets/stool-1.png",
+  },
+  {
+    key: "shelf2",
+    path: "assets/shelf-2.png",
+  },
+  {
+    key: "bigtable2",
+    path: "assets/bigtable-2.png",
   },
 ];
 
@@ -66,8 +102,8 @@ const roomLayout = [
   {
     asset: "bigtable1",
     tileX: 3,
-    tileY: 13,
-    scale: 6,
+    tileY: 13.3,
+    scale: 7,
     anchor: "top-left",
   },
   {
@@ -82,29 +118,92 @@ const roomLayout = [
     asset: "bed1",
     tileX: 1.6,
     tileY: 4.2,
-    scale: 5,
+    scale: 6,
     anchor: "top-left",
   },
   {
     asset: "bed2",
-    tileX: 12,
+    tileX: 11.8,
     tileY: 0.7,
-    scale: 5,
+    scale: 6,
     anchor: "bottom",
   },
   {
     asset: "bed3",
     tileX: 2.6,
-    tileY: 0.7,
+    tileY: 0.6,
     scale: 5,
     anchor: "bottom",
   },
   {
     asset: "sofa1",
-    tileX: 8,
-    tileY: 6,
+    tileX: 11,
+    tileY: 12,
+    scale: 6,
+    anchor: "top-left",
+  },
+  {
+    asset: "piano",
+    tileX: 10,
+    tileY: 13.6,
     scale: 5,
     anchor: "top-left",
+  },
+  {
+    asset: "pianochair1",
+    tileX: 10.4,
+    tileY: 14.3,
+    scale: 4,
+    anchor: "top-left",
+  },
+  {
+    asset: "shelf1",
+    tileX: 2.8,
+    tileY: 11.5,
+    scale: 4.3,
+    anchor: "top-left",
+  },
+  {
+    asset: "sofa2",
+    tileX: 3.7,
+    tileY: 12,
+    scale: 6,
+    anchor: "top-left",
+  },
+  {
+    asset: "stool1",
+    tileX: 10.5,
+    tileY: 6.8,
+    scale: 3,
+    anchor: "top-left",
+  },
+  {
+    asset: "stool2",
+    tileX: 9.8,
+    tileY: 6.8,
+    scale: 3,
+    anchor: "top-left",
+  },
+  {
+    asset: "stool3",
+    tileX: 11,
+    tileY: 6.8,
+    scale: 3,
+    anchor: "top-left",
+  },
+  {
+    asset: "shelf2",
+    tileX: 4.2,
+    tileY: 0,
+    scale: 6,
+    anchor: "bottom",
+  },
+  {
+    asset: "bigtable2",
+    tileX: 2.8,
+    tileY: 3.6,
+    scale: 4,
+    anchor: "bottom",
   },
 ];
 
