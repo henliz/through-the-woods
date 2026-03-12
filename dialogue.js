@@ -199,8 +199,8 @@ function isMouseOver(x, y, w, h) {
 function drawOptions() {
   if (!activeNPC) return;
 
-  let btnW = width * 0.28;
-  let btnH = height * 0.07;
+  let btnW = 1080 / 3;
+  let btnH = 241 / 3;
   let btnX = width * 0.6;
   let startY = height * 0.4;
   let gap = btnH + 10;
@@ -219,7 +219,7 @@ function drawOptions() {
     } else if (i === selectedOption) {
       image(uiBtnHover, btnX, btnY, btnW, btnH);
     } else {
-      image(uiBtnRegular, btnX, btnY, btnW, btnH);
+      image(uiBtnRegular, btnX, btnY, btnW, btnH + 18);
     }
 
     // text colour — white on dark red hover, dark on light buttons
