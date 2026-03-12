@@ -444,7 +444,7 @@ function keyPressed() {
     return;
   }
 
-  if (key === "g" || key === "G") {
+  if (isPlayerNearDoor1(player) && (key === "g" || key === "G")) {
     currentScene = "END";
     return;
   }

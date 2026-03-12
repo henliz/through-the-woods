@@ -335,7 +335,7 @@ const door1Layout = {
   tileY: 1.1,
   scale: 5,
   anchor: "bottom",
-  interactRadius: 80, // radius (in pixels) where the player can interact
+  interactRadius: 120, // radius (in pixels) where the player can interact
 };
 
 // ============================================================
