@@ -61,7 +61,7 @@ function preload() {
 
   // journal pages
   doctorPg = loadImage("assets/journal/Krisia_journal.png");
-  rmPg = loadImage("journalPages/RM Profile.png");
+  rmPg = loadImage("assets/journal/Jerome_journal.png");
   innkeeperPg = loadImage("assets/journal/Mrs.Gustall_journal.png");
   fdlPg = loadImage("assets/journal/Helen_journal.png");
   evidencePg = loadImage("assets/journal/Evidence_journal.png");
