@@ -224,6 +224,12 @@ function draw() {
   if (currentScene === "HOME") {
     drawHomePage();
     return;
+  } else if (currentScene === "END") {
+    drawEndPage();
+    setTimeout(() => {
+      currentScene = "GAME";
+    }, 2000);
+    return;
   }
 
   if (!journal.isOpen) {
@@ -387,6 +393,30 @@ function drawPrompt() {
       break; // only show prompt for one NPC at a time
     }
   }
+
+  // Check for door1 interaction
+  if (isPlayerNearDoor1(player)) {
+    // convert door world position to screen position
+    let doorPos = getPropPosition(door1Layout);
+    if (doorPos) {
+      let screenX = doorPos.actualX - camX;
+      let screenY = doorPos.actualY - camY;
+      // draw a small dark pill-shaped box above the door
+      let msg = "Press 'G' to go to bed";
+      textSize(16);
+      let msgW = textWidth(msg) + 20;
+      let msgH = 24;
+      let msgX = screenX - msgW / 4;
+      let msgY = screenY - 50;
+      fill(255); // semi-transparent dark background
+      noStroke();
+      rect(msgX, msgY, msgW, msgH, 12); // 12 = rounded corners
+      fill(0);
+      textAlign(CENTER, CENTER);
+      textSize(16);
+      text(msg, screenX + msgW / 4, msgY + msgH / 2);
+    }
+  }
 }
 
 //journal icon
@@ -411,6 +441,11 @@ function keyPressed() {
     if (keyCode === ENTER) {
       currentScene = "GAME";
     }
+    return;
+  }
+
+  if (key === "g" || key === "G") {
+    currentScene = "END";
     return;
   }
 

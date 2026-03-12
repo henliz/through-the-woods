@@ -283,16 +283,6 @@ const roomLayout = [
     anchor: "bottom",
   },
 
-  //Little Red Room Door setting
-
-  {
-    asset: "door1",
-    tileX: 7.3,
-    tileY: 1.3,
-    scale: 5,
-    anchor: "bottom",
-  },
-
   //office clutter setting
   {
     asset: "desk",
@@ -338,6 +328,16 @@ const roomLayout = [
   },
 ];
 
+//Little Red Room Door setting
+const door1Layout = {
+  asset: "door1",
+  tileX: 7.3,
+  tileY: 1.1,
+  scale: 5,
+  anchor: "bottom",
+  interactRadius: 80, // radius (in pixels) where the player can interact
+};
+
 // ============================================================
 // HELPER: Get position and size for a prop
 // ============================================================
@@ -362,8 +362,20 @@ function getPropPosition(f, worldX = 0, worldY = 0) {
   return { actualX, actualY, dw, dh };
 }
 
+function isPlayerNearDoor1(player) {
+  // determine door's world position (center of the sprite)
+  const pos = getPropPosition(door1Layout);
+  if (!pos) return false;
+
+  const doorCenterX = pos.actualX + pos.dw / 2;
+  const doorCenterY = pos.actualY + pos.dh / 2;
+  const d = dist(player.px, player.py, doorCenterX, doorCenterY);
+
+  return d < (door1Layout.interactRadius || 80);
+}
+
 // ============================================================
-// COLLISON: Checko if player collides with any clutter props. Returns true if collision detected.
+// COLLISON: Check if player collides with any clutter props. Returns true if collision detected.
 // ============================================================
 
 function checkCollision(playerNextX, playerNextY, playerR) {
@@ -449,6 +461,15 @@ function clutterDraw(worldX = 0, worldY = 0) {
 
     image(p.img, pos.actualX, pos.actualY, pos.dw, pos.dh);
   }
+
+  // Draw door1 separately
+  const doorImg = clutterImages[door1Layout.asset];
+  if (doorImg) {
+    const pos = getPropPosition(door1Layout, worldX, worldY);
+    if (pos) {
+      image(doorImg, pos.actualX, pos.actualY, pos.dw, pos.dh);
+    }
+  }
 }
 
 // ============================================================
@@ -459,3 +480,5 @@ function clutterDraw(worldX = 0, worldY = 0) {
 window.clutterPreload = clutterPreload;
 window.clutterSetup = clutterSetup;
 window.clutterDraw = clutterDraw;
+// also expose door layout so other modules can inspect or modify it
+window.door1Layout = door1Layout;

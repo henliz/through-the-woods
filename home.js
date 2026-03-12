@@ -1,6 +1,7 @@
 const SCENE = {
   HOME: "HOME",
   GAME: "GAME",
+  END: "END",
 };
 
 let homeBgImg;
@@ -95,4 +96,12 @@ function drawHomePage() {
     boxWidth - padding * 2,
     boxHeight - padding * 2,
   );
+}
+
+function drawEndPage() {
+  background(0);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(24);
+  text("Day 2\n 1 day until the sheriff arrives", width / 2, height / 2 - 20);
 }
