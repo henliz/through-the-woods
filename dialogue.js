@@ -36,10 +36,10 @@ function closeDialogue() {
 function drawDialogue() {
   if (dialoguePhase === "closed") return;
 
-  let boxX = width * 0.1;
-  let boxY = height * 0.7;
-  let boxW = width * 0.8;
-  let boxH = height * 0.25;
+  let boxW = 1857 / 3; // control width only
+  let boxH = 681 / 3; // height follows aspect ratio
+  let boxX = width * 0.5 - boxW / 2; // centered horizontally
+  let boxY = height - boxH - 20; // pinned to bottom with padding
 
   drawPortrait(boxX, boxY, boxW);
   drawDialogueBox(boxX, boxY, boxW, boxH);
@@ -54,9 +54,11 @@ function drawDialogue() {
 
 //helper functions for drawDialogue
 function drawDialogueBox(boxX, boxY, boxW, boxH) {
-  fill(70, 130, 180);
-  noStroke();
-  rect(boxX, boxY, boxW, boxH, 8);
+  if (dialoguePhase === "monologue" || dialoguePhase === "hesitation") {
+    image(uiMonologueBox, boxX, boxY, boxW, boxH);
+  } else {
+    image(uiMainBox, boxX, boxY, boxW, boxH);
+  }
 }
 
 function drawPortrait(boxX, boxY, boxW) {
@@ -107,74 +109,74 @@ function getActivePortrait() {
 }
 
 function drawNameTag(boxX, boxY, boxW) {
-  let tagH = 28;
+  let tagH = 70;
   let tagY = boxY - tagH;
 
   if (dialoguePhase === "monologue" || dialoguePhase === "hesitation") {
     // Little Red name tag on the RIGHT
-    let tagW = 100;
+    let tagW = 180;
     let tagX = boxX + boxW - tagW - 20;
-    fill(50, 100, 150);
+    fill(168, 86, 21);
     noStroke();
     rect(tagX, tagY, tagW, tagH, 4);
     fill(255);
-    textSize(13);
+    textSize(45);
     textAlign(CENTER, CENTER);
-    text("Little Red", tagX + tagW / 2, tagY + tagH / 2);
+    text("Little Red", tagX + tagW / 2, tagY + tagH / 2.5);
   } else if (activeNPC && activeNPC.dialogue.name) {
     // NPC name tag on the LEFT
-    let tagW = textWidth(activeNPC.dialogue.name) + 24;
+    let tagW = textWidth(activeNPC.dialogue.name) + 140;
     let tagX = boxX + 20;
-    fill(50, 100, 150);
+    fill(168, 86, 21);
     noStroke();
     rect(tagX, tagY, tagW, tagH, 4);
     fill(255);
-    textSize(13);
+    textSize(45);
     textAlign(LEFT, CENTER);
-    text(activeNPC.dialogue.name, tagX + 12, tagY + tagH / 2);
+    text(activeNPC.dialogue.name, tagX + 12, tagY + tagH / 2.5);
   }
 }
 
 function drawDialogueText(boxX, boxY, boxW, boxH) {
   // text starts after the portrait width so it doesn't overlap
-  let textX = boxX + 30;
-  let textW = boxW - 60;
+  let textX = boxX + 50;
+  let textW = boxW - 75;
 
   if (dialoguePhase === "hesitation") {
-    fill("#2e0401");
+    fill(255);
     textStyle(ITALIC);
-    textSize(16);
+    textSize(30);
     textAlign(LEFT, TOP);
-    text(activeNPC.dialogue.hesitationLine, textX, boxY + 20, textW, boxH - 40);
+    text(activeNPC.dialogue.hesitationLine, textX, boxY + 40, textW, boxH - 80);
     textStyle(NORMAL);
     return;
   }
 
   if (dialoguePhase === "monologue" && chosenOption) {
-    fill("#2e0401");
+    fill(255);
     textStyle(ITALIC);
-    textSize(16);
+    textSize(30);
     textAlign(LEFT, TOP);
-    text(chosenOption.monologue, textX, boxY + 20, textW, boxH - 40);
+    text(chosenOption.monologue, textX, boxY + 40, textW, boxH - 80);
     textStyle(NORMAL);
     return;
   }
 
   fill(255);
-  textSize(16);
+  textSize(30);
   textAlign(LEFT, TOP);
 
   if (dialoguePhase === "opening") {
-    text(activeNPC.dialogue.opening, textX, boxY + 20, textW, boxH - 40);
+    text(activeNPC.dialogue.opening, textX, boxY + 40, textW, boxH - 80);
   }
   if (dialoguePhase === "choosing") {
-    text(activeNPC.dialogue.opening, textX, boxY + 20, textW, boxH - 40);
+    text(activeNPC.dialogue.opening, textX, boxY + 40, textW, boxH - 80);
   }
   if (dialoguePhase === "repeat" || dialoguePhase === "repeat-choosing") {
-    text(activeNPC.dialogue.repeatLine, textX, boxY + 20, textW, boxH - 40);
+    text(activeNPC.dialogue.repeatLine, textX, boxY + 40, textW, boxH - 80);
   }
   if (dialoguePhase === "response" && chosenOption) {
-    text(chosenOption.npcResponse, textX, boxY + 20, textW, boxH - 40);
+    text(chosenOption.npcResponse, textX, boxY + 40, textW, boxH - 80);
   }
 }
 
@@ -183,10 +185,10 @@ function drawEnterHint(boxX, boxY, boxW, boxH) {
   if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing")
     return;
 
-  fill(255, 255, 255, 180);
-  textSize(11);
+  fill(255, 255, 255, 200);
+  textSize(18);
   textAlign(RIGHT, BOTTOM);
-  text("Press ENTER to continue", boxX + boxW - 15, boxY + boxH - 10);
+  text("Press ENTER to continue", boxX + boxW - 60, boxY + boxH - 25);
 }
 
 function isMouseOver(x, y, w, h) {
@@ -203,46 +205,47 @@ function drawOptions() {
   let startY = height * 0.4;
   let gap = btnH + 10;
 
-  let options = activeNPC.dialogue.options;
-  let drawnIndex = 0; // tracks vertical position separately from option index
+  let visibleIndices = getVisibleOptionIndices(); // single source of truth
 
-  for (let i = 0; i < options.length; i++) {
-    let option = options[i];
-
-    // skip options already used (except C which is always the exit)
-    if (option.id !== "C" && activeNPC.usedOptions.includes(option.id)) {
-      continue;
-    }
-
+  for (let drawnIndex = 0; drawnIndex < visibleIndices.length; drawnIndex++) {
+    let i = visibleIndices[drawnIndex]; // real option index
+    let option = activeNPC.dialogue.options[i];
     let btnY = startY + drawnIndex * gap;
     let canAfford = spoonsRemaining >= option.cost;
 
-    // style the button
+    // draw button image based on state
     if (!canAfford && option.id !== "C") {
-      fill(160, 160, 160); // faded — can't afford
+      image(uiBtnDisabled, btnX, btnY, btnW, btnH);
     } else if (i === selectedOption) {
-      fill(180, 180, 180); // highlighted
+      image(uiBtnHover, btnX, btnY, btnW, btnH);
     } else {
-      fill(220, 220, 220); // normal
+      image(uiBtnRegular, btnX, btnY, btnW, btnH);
     }
 
-    noStroke();
-    rect(btnX, btnY, btnW, btnH, 6);
+    // text colour — white on dark red hover, dark on light buttons
+    if (i === selectedOption && (canAfford || option.id === "C")) {
+      fill(255); // white text on dark red hover button
+    } else if (!canAfford && option.id !== "C") {
+      fill(100, 100, 100); // grey text on disabled button
+    } else {
+      fill(30, 30, 30); // dark text on regular button
+    }
 
-    // text colour
-    fill(
-      canAfford || option.id === "C" ? color(30, 30, 30) : color(120, 120, 120),
-    );
-    textSize(14);
+    textSize(18);
     textAlign(LEFT, CENTER);
-    text(option.playerLine, btnX + 10, btnY, btnW - 60, btnH);
+    text(option.playerLine, btnX + 13, btnY - 7, btnW - 60, btnH);
 
-    // spoon cost badge
+    // cookie cost badge
+    let iconSize = 25;
+    let iconX = btnX + btnW - iconSize - 8;
+    let iconY = btnY + btnH / 2 - iconSize / 2;
+    image(spoonImg, iconX, iconY, iconSize, iconSize);
+
+    // cost number next to the cookie
+    fill(255);
     textAlign(RIGHT, CENTER);
-    textSize(13);
-    text("🥄 " + option.cost, btnX + btnW - 8, btnY + btnH / 2);
-
-    drawnIndex++;
+    textSize(18);
+    text(option.cost, btnX + btnW - iconSize - 12, btnY + btnH / 2);
   }
 }
 
@@ -262,6 +265,14 @@ function confirmChoice() {
 
   spoonsRemaining -= option.cost;
   chosenOption = option;
+
+  // reset highlight to first visible option for next time buttons appear
+  let visible = getVisibleOptionIndices();
+  // filter out the option just chosen since it'll be gone next round
+  visible = visible.filter(
+    (i) => activeNPC.dialogue.options[i].id !== option.id,
+  );
+  selectedOption = visible.length > 0 ? visible[0] : 0;
 
   // mark this option as used (skip C — it's always the exit)
   if (option.id !== "C") {

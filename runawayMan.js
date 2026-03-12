@@ -1,4 +1,5 @@
 const runawayManDialogue = {
+  name: "Mysterious Man",
   opening: "Everyone's on edge… what do you want?",
   repeatLine: "…I already said what I had to say.",
   hesitationLine: "I can't deal with his attitude right now, not like this…",
@@ -36,5 +37,7 @@ const runawayManDialogue = {
 
 const runawayMan = new NPC(700, 500, runawayManDialogue);
 runawayMan.journalPageIndex = 2;
+runawayMan.portraitKey = "runawayMan";
+runawayMan.currentEmotion = "idle";
 
 window.runawayMan = runawayMan;

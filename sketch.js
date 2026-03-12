@@ -4,6 +4,7 @@ let player;
 let spoonImg;
 let innkeeperImg;
 let nunImg;
+let runawayManImg;
 
 let camX = 0;
 let camY = 0;
@@ -30,24 +31,38 @@ let evidencePg;
 
 let portraits = {}; // for dialogue portraits
 
+//dialogue ui
+let uiMainBox, uiMonologueBox;
+let uiBtnRegular, uiBtnHover, uiBtnDisabled;
+
 let currentScene = "HOME";
 let journalicon;
+
+let jersey10Font;
+let journalFont;
+
+let primaryTextC;
+let monologueTextC;
+let dialogueHoverButtonTextC;
+let dialogueDisabledButtonTextC;
+let journalTextC;
 
 function preload() {
   tf1Preload();
   clutterPreload();
   charSheet = loadImage("redridinghood.png");
   loadHomeAssets();
-  spoonImg = loadImage("assets/spoon-placeholder.png");
+  spoonImg = loadImage("assets/cookies.png");
   innkeeperImg = loadImage("assets/innkeeper_sprite.png");
   nunImg = loadImage("nuns.png");
+  runawayManImg = loadImage("assets/Jerome_spirtesheet.png");
 
   // journal pages
-  doctorPg = loadImage("journalPages/Doctor profile.png");
+  doctorPg = loadImage("assets/journal/Krisia_journal.png");
   rmPg = loadImage("journalPages/RM Profile.png");
-  innkeeperPg = loadImage("journalPages/Innkeeper profile.png");
-  fdlPg = loadImage("journalPages/FDL Profile.png");
-  evidencePg = loadImage("journalPages/Evidence page.png");
+  innkeeperPg = loadImage("assets/journal/Mrs.Gustall_journal.png");
+  fdlPg = loadImage("assets/journal/Helen_journal.png");
+  evidencePg = loadImage("assets/journal/Evidence_journal.png");
 
   // character portraits
   portraits = {
@@ -64,11 +79,31 @@ function preload() {
       happy: loadImage("assets/portraits/LR_Happy.png"),
       determined: loadImage("assets/portraits/LR_Determined.png"),
     },
-    // doctor and runawayMan portraits go here when ready:
-    // doctor: { idle: loadImage("assets/portraits/DR_Idle.png"), ... },
-    // runawayMan: { idle: loadImage("assets/portraits/RM_Idle.png"), ... },
+    doctor: {
+      idle: loadImage("assets/portraits/Doctor_idle.png"),
+      nervous: loadImage("assets/portraits/Doctor_nervous.png"),
+      happy: loadImage("assets/portraits/Doctor_happy.png"),
+      sus: loadImage("assets/portraits/Doctor_sus.png"),
+      angry: loadImage("assets/portraits/Doctor_angry.png"),
+    },
+    runawayMan: {
+      idle: loadImage("assets/portraits/RM_idle.png"),
+      nervous: loadImage("assets/portraits/RM_nervous.png"),
+      happy: loadImage("assets/portraits/RM_happy.png"),
+      sus: loadImage("assets/portraits/RM_sus.png"),
+      angry: loadImage("assets/portraits/RM_angry.png"),
+    },
   };
   journalicon = loadImage("assets/bookicon.png");
+  // ui dialogue elements
+  uiMainBox = loadImage("assets/ui elements/Main Dialogue Box.png");
+  uiMonologueBox = loadImage("assets/ui elements/Inner Monologue Box.png");
+  uiBtnRegular = loadImage("assets/ui elements/Dialogue choice regular.png");
+  uiBtnHover = loadImage("assets/ui elements/Dialogue choice hover.png");
+  uiBtnDisabled = loadImage("assets/ui elements/Dialogue choice disabled.png");
+
+  jersey10Font = loadFont("assets/Jersey10-Regular.ttf");
+  journalFont = loadFont("assets/ReenieBeanie-Regular.ttf");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -160,6 +195,14 @@ function getInnZones() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noSmooth();
+  textFont(jersey10Font);
+
+  //text colours
+  primaryTextC = color(168, 86, 21);
+  monologueTextC = color(255);
+  dialogueHoverButtonTextC = color(255);
+  dialogueDisabledButtonTextC = color(168, 86, 21);
+  journalTextC = color(255);
 
   tf1Setup();
 
@@ -213,6 +256,9 @@ function setup() {
   doctor.spriteFrameW = 48;
   doctor.spriteFrameH = 48;
   runawayMan.colour = color(100, 220, 130); // green
+  runawayMan.sprite = runawayManImg;
+  runawayMan.spriteFrameW = 48;
+  runawayMan.spriteFrameH = 56;
 }
 
 function draw() {
@@ -331,10 +377,10 @@ function windowResized() {
 }
 
 function drawSpoonCounter() {
-  let spoonSize = 36; // size of each spoon icon
-  let gap = 8; // gap between spoons
+  let spoonSize = 70; // size of each spoon icon
+  let gap = 0.5; // gap between spoons
   let startX = width * 0.7; // left padding from screen edge
-  let startY = 20; // top padding from screen edge
+  let startY = 10; // top padding from screen edge
 
   for (let i = 0; i < 7; i++) {
     let x = startX + i * (spoonSize + gap);
@@ -388,9 +434,9 @@ function drawPrompt() {
 //journal icon
 function drawJournalIcon() {
   const ix = width - 60,
-    iy = 20,
-    iw = 40,
-    ih = 40;
+    iy = 80,
+    iw = 44,
+    ih = 44;
 
   image(journalicon, ix, iy, iw, ih);
 
