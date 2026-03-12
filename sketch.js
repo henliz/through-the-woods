@@ -214,6 +214,7 @@ function setup() {
   tf1Setup();
   // once the floor/tile system exists we can place our furniture
   clutterSetup();
+  lightingSetup();
 
   player = new Player();
   player.dir = DIR.down;
@@ -312,6 +313,8 @@ function draw() {
   }
   pop();
 
+  drawLighting(); // screen-space overlay — after world, before all UI
+
   drawDialogue();
   drawSpoonCounter();
   drawPrompt();
@@ -400,6 +403,7 @@ function drawPlayer() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  lightingResized();
 }
 
 function drawSpoonCounter() {
