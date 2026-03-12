@@ -9,25 +9,25 @@ let wallDoor; // optional (not used yet)
 let insideSideWall;
 
 const TF1_S = 32;
-const TF1_SCALE = 4;
-const TF1_T = TF1_S * TF1_SCALE; // 128px per tile
+const TF1_SCALE = 3.2;           // 80% of original — scales tile rendering & world size
+const TF1_T = TF1_S * TF1_SCALE; // 102.4px per tile
 
 // Back wall overlap into floor edge (how much the wall "sits" on the floor line)
 const BACK_WALL_OVERLAP = Math.floor(TF1_T * 0.2);
 
 // ✅ More overlap between segments to hide seams
-const WALL_OVERLAP_PX = 8; // try 6..10
+const WALL_OVERLAP_PX = 6; // was 8
 
-// ✅ Raise the back walls so they align with corners (your screenshot needs this)
-const BACK_WALL_RAISE_PX = 64; // try 16..28
+// ✅ Raise the back walls so they align with corners
+const BACK_WALL_RAISE_PX = 51; // was 64
 
-const BACK_WALL_SHIFT_X = 8; // slide back walls left (try -1..-4)
+const BACK_WALL_SHIFT_X = 6; // was 8
 
-const WALL_WIDTH_TRIM = 4; // pixels to shave off each wall segment (try 2–6)
+const WALL_WIDTH_TRIM = 3; // was 4
 
 // Side walls
 const SIDE_EDGE_PAD = 2;
-const SIDE_WALL_X_NUDGE = 8; // try -6..+6 (neg = more left, pos = more right)
+const SIDE_WALL_X_NUDGE = 6; // was 8
 const SIDE_WALL_START_DROP = Math.floor(TF1_T * 0.55);
 
 // Corners are perfect — keep this
@@ -86,6 +86,7 @@ function tf1Setup() {
   // expose real numbers AFTER setup
   window.TF1_W = TF1_W;
   window.TF1_H = TF1_H;
+  window.TF1_T = TF1_T;
 }
 
 function isFloor(col, row) {

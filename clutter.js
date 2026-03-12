@@ -347,8 +347,10 @@ function getPropPosition(f, worldX = 0, worldY = 0) {
   const img = f.img || clutterImages[f.asset];
   if (!img) return null;
 
-  const dw = img.width * (f.scale ?? 4);
-  const dh = img.height * (f.scale ?? 4);
+  // scale prop sprites proportionally with the tile size
+  const scaleFactor = (f.scale ?? 4) * (T / 128);
+  const dw = img.width * scaleFactor;
+  const dh = img.height * scaleFactor;
 
   const x = worldX + f.tileX * T;
   const y = worldY + f.tileY * T;
