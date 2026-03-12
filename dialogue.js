@@ -5,6 +5,9 @@ let spoonsRemaining = 7; // spoon budget for the day
 let chosenOption = null; // stores the option the player picked
 const tooTiredLine = "Gosh… I couldn't bring myself to ask them that."; // dialogue for when you don't have enough spoons to choose a dialogue option
 
+// Exposed dialogue box bounds so sketch.js can hit-test clicks/hover
+let dialogueBoxBounds = null;
+
 // Typewriter effect state
 let typewriterTarget = "";
 let typewriterIndex = 0;
@@ -69,13 +72,18 @@ function closeDialogue() {
 }
 
 function drawDialogue() {
-  if (dialoguePhase === "closed") return;
+  if (dialoguePhase === "closed") {
+    dialogueBoxBounds = null;
+    return;
+  }
   tickTypewriter();
 
   let boxW = 1857 / 3; // control width only
   let boxH = 681 / 3; // height follows aspect ratio
   let boxX = width * 0.12; // left-aligned with small margin
   let boxY = height - boxH - 20; // pinned to bottom with padding
+
+  dialogueBoxBounds = { x: boxX, y: boxY, w: boxW, h: boxH };
 
   drawPortrait(boxX, boxY, boxW);
   drawDialogueBox(boxX, boxY, boxW, boxH);
@@ -221,10 +229,18 @@ function drawEnterHint(boxX, boxY, boxW, boxH) {
   // don't show until text has fully revealed
   if (!typewriterDone) return;
 
-  fill(255, 255, 255, 200);
+  const hintX = boxX + boxW - 60;
+  const hintY = boxY + boxH - 25;
+
+  // brighten on hover
+  const hinting = dialogueBoxBounds &&
+    mouseX > dialogueBoxBounds.x && mouseX < dialogueBoxBounds.x + dialogueBoxBounds.w &&
+    mouseY > dialogueBoxBounds.y && mouseY < dialogueBoxBounds.y + dialogueBoxBounds.h;
+
+  fill(255, 255, 255, hinting ? 255 : 200);
   textSize(18);
   textAlign(RIGHT, BOTTOM);
-  text("Press ENTER to continue", boxX + boxW - 60, boxY + boxH - 25);
+  text("Press ENTER to continue", hintX, hintY);
 }
 
 function isMouseOver(x, y, w, h) {

@@ -38,6 +38,7 @@ let uiMainBox, uiMonologueBox;
 let uiBtnRegular, uiBtnHover, uiBtnDisabled;
 
 let currentScene = "HOME";
+let npcPromptBounds = null; // set each frame by drawPrompt()
 let journalicon;
 
 let jersey10Font;
@@ -321,6 +322,7 @@ function draw() {
   drawJournalIcon();
   journal.display();
   bedtime();
+  updateHoverCursor();
 }
 
 function updatePlayer() {
@@ -431,8 +433,12 @@ function drawSpoonCounter() {
 }
 
 function drawPrompt() {
-  if (dialoguePhase !== "closed") return; // hide during dialogue
+  if (dialoguePhase !== "closed") {
+    npcPromptBounds = null;
+    return; // hide during dialogue
+  }
 
+  npcPromptBounds = null;
   for (let npc of npcs) {
     if (npc.isPlayerNearby(player)) {
       // convert NPC world position to screen position (account for zoom)
@@ -447,9 +453,14 @@ function drawPrompt() {
       let msgX = screenX - msgW / 2;
       let msgY = screenY - 90;
 
-      fill(0, 0, 0, 180); // semi-transparent dark background
+      npcPromptBounds = { x: msgX, y: msgY, w: msgW, h: msgH, npc };
+
+      const hoveringPrompt = mouseX > msgX && mouseX < msgX + msgW &&
+                             mouseY > msgY && mouseY < msgY + msgH;
+
+      fill(hoveringPrompt ? 40 : 0, 0, 0, 180);
       noStroke();
-      rect(msgX, msgY, msgW, msgH, 12); // 12 = rounded corners
+      rect(msgX, msgY, msgW, msgH, 12);
 
       fill(255);
       textAlign(CENTER, CENTER);
@@ -499,6 +510,68 @@ function drawJournalIcon() {
     fill(210, 50, 50);
     ellipse(ix + 5, iy + 5, 14, 14);
   }
+}
+
+function isMouseOverNPC(npc) {
+  const wx = mouseX / CAM_ZOOM + camX;
+  const wy = mouseY / CAM_ZOOM + camY;
+  const hw = (npc.spriteFrameW || 48) * NPC_CHAR_SCALE / 2;
+  const hh = (npc.spriteFrameH || 48) * NPC_CHAR_SCALE / 2;
+  return wx > npc.x - hw && wx < npc.x + hw &&
+         wy > npc.y - 8 - hh && wy < npc.y - 8 + hh;
+}
+
+function updateHoverCursor() {
+  let hovering = false;
+
+  // Home screen "Press ENTER to start"
+  if (currentScene === "HOME") {
+    const ty = height * 0.5 - 20;
+    if (mouseY > ty - 16 && mouseY < ty + 16) hovering = true;
+  }
+
+  // NPC talk prompt pill
+  if (npcPromptBounds) {
+    const b = npcPromptBounds;
+    if (mouseX > b.x && mouseX < b.x + b.w && mouseY > b.y && mouseY < b.y + b.h)
+      hovering = true;
+  }
+
+  // Dialogue box (advance / typewriter-skip click target)
+  if (dialogueBoxBounds && dialoguePhase !== "choosing" && dialoguePhase !== "repeat-choosing") {
+    const b = dialogueBoxBounds;
+    if (mouseX > b.x && mouseX < b.x + b.w && mouseY > b.y && mouseY < b.y + b.h)
+      hovering = true;
+  }
+
+  // Dialogue choice buttons — also update selectedOption on hover
+  if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
+    const btnW = 1080 / 3;
+    const btnH = 241 / 3;
+    const btnX = width * 0.6;
+    const startY = height * 0.4;
+    const gap = btnH + 10;
+    const visibleIndices = getVisibleOptionIndices();
+    for (let i = 0; i < visibleIndices.length; i++) {
+      const btnY = startY + i * gap;
+      if (mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH) {
+        hovering = true;
+        selectedOption = visibleIndices[i];
+        break;
+      }
+    }
+  }
+
+  // NPC sprites (world-space hit test)
+  if (dialoguePhase === "closed" && currentScene === "GAME") {
+    for (const npc of npcs) {
+      if (isMouseOverNPC(npc)) { hovering = true; break; }
+    }
+  }
+
+  const clickCursor = "url('assets/cursor-click.png') 4 4, auto";
+  const defaultCursor = "url('assets/cursor-default.png') 4 4, auto";
+  document.body.style.cursor = (hovering || mouseIsPressed) ? clickCursor : defaultCursor;
 }
 
 function keyPressed() {
@@ -614,6 +687,20 @@ function keyPressed() {
 }
 
 function mousePressed() {
+  // Home screen — click "Press ENTER to start" row
+  if (currentScene === "HOME") {
+    const ty = height * 0.5 - 20;
+    if (mouseY > ty - 16 && mouseY < ty + 16) {
+      currentScene = "PROLOGUE";
+      prologueVideo.play();
+      prologueVideo.elt.onended = () => {
+        currentScene = "GAME";
+        prologueVideo.hide();
+      };
+      return;
+    }
+  }
+
   if (
     mouseX > width - 60 &&
     mouseX < width - 20 &&
@@ -629,19 +716,70 @@ function mousePressed() {
     return;
   }
 
-  // handle dialogue option clicks
-  if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
-    let btnW = width * 0.28;
-    let btnH = height * 0.07;
-    let btnX = width * 0.6;
-    let startY = height * 0.4;
-    let gap = btnH + 10;
+  // NPC talk prompt click
+  if (npcPromptBounds) {
+    const b = npcPromptBounds;
+    if (mouseX > b.x && mouseX < b.x + b.w && mouseY > b.y && mouseY < b.y + b.h) {
+      openDialogue(b.npc);
+      return;
+    }
+  }
 
-    for (let i = 0; i < 3; i++) {
-      let btnY = startY + i * gap;
+  // NPC sprite click (only when player is nearby)
+  if (dialoguePhase === "closed" && currentScene === "GAME") {
+    for (const npc of npcs) {
+      if (isMouseOverNPC(npc) && npc.isPlayerNearby(player)) {
+        openDialogue(npc);
+        return;
+      }
+    }
+  }
+
+  // Dialogue box click — same logic as pressing Enter (skips typewriter first)
+  if (dialogueBoxBounds && dialoguePhase !== "choosing" && dialoguePhase !== "repeat-choosing") {
+    const b = dialogueBoxBounds;
+    if (mouseX > b.x && mouseX < b.x + b.w && mouseY > b.y && mouseY < b.y + b.h) {
+      if (!typewriterDone) {
+        skipTypewriter();
+        return;
+      }
+      // advance phase (mirror Enter key logic for non-choosing phases)
+      if (dialoguePhase === "opening") {
+        dialoguePhase = "choosing";
+      } else if (dialoguePhase === "repeat") {
+        if (spoonsRemaining === 0) closeDialogue();
+        else dialoguePhase = "repeat-choosing";
+      } else if (dialoguePhase === "response") {
+        dialoguePhase = "monologue";
+        startTypewriter(chosenOption.monologue);
+      } else if (dialoguePhase === "monologue") {
+        if (!chosenOption || spoonsRemaining === 0 || chosenOption.cost === 0 || chosenOption.cost === -1) {
+          closeDialogue();
+        } else {
+          dialoguePhase = "repeat";
+          startTypewriter(activeNPC.dialogue.repeatLine);
+        }
+      } else if (dialoguePhase === "hesitation") {
+        closeDialogue();
+      }
+      return;
+    }
+  }
+
+  // Dialogue choice button clicks
+  if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
+    const btnW = 1080 / 3;
+    const btnH = 241 / 3;
+    const btnX = width * 0.6;
+    const startY = height * 0.4;
+    const gap = btnH + 10;
+    const visibleIndices = getVisibleOptionIndices();
+
+    for (let i = 0; i < visibleIndices.length; i++) {
+      const btnY = startY + i * gap;
       if (isMouseOver(btnX, btnY, btnW, btnH)) {
-        selectedOption = i;
-        confirmChoice(); // works for both affordable and unaffordable
+        selectedOption = visibleIndices[i];
+        confirmChoice();
         return;
       }
     }
