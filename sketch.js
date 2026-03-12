@@ -39,6 +39,9 @@ let uiBtnRegular, uiBtnHover, uiBtnDisabled;
 
 let currentScene = "HOME";
 let npcPromptBounds = null; // set each frame by drawPrompt()
+
+let currentDay = 1;
+const TOTAL_DAYS = 3;
 let journalicon;
 
 let jersey10Font;
@@ -224,15 +227,15 @@ function setup() {
   const zones = getInnZones();
   const used = [];
 
-  // Player spawn (main area)
-  let p = findSpawnPoint({
-    r: P_RADIUS,
-    region: zones.main,
-    avoid: used,
-    minDist: 160,
-  });
-  player.px = p.x;
-  player.py = p.y;
+  // Player spawns just inside the door
+  const doorPos = getPropPosition(door1Layout);
+  if (doorPos) {
+    player.px = doorPos.actualX + doorPos.dw / 2;
+    player.py = doorPos.actualY + doorPos.dh + 60;
+  } else {
+    player.px = 7.3 * TF1_T;
+    player.py = 3 * TF1_T;
+  }
   used.push({ x: player.px, y: player.py });
 
   // NPC spawns (spread out)
@@ -320,6 +323,7 @@ function draw() {
   drawSpoonCounter();
   drawPrompt();
   drawJournalIcon();
+  drawDayCounter();
   journal.display();
   bedtime();
   updateHoverCursor();
@@ -409,26 +413,49 @@ function windowResized() {
 }
 
 function drawSpoonCounter() {
-  let spoonSize = 70; // size of each spoon icon
-  let gap = 0.5; // gap between spoons
-  let startX = width * 0.65; // left padding from screen edge
-  let startY = 10; // top padding from screen edge
+  const spoonSize = 70;
+  const gap = 0.5;
+  const startX = 20;
+  const startY = 10;
 
-  for (let i = 0; i < 7; i++) {
-    let x = startX + i * (spoonSize + gap);
-
-    if (i < spoonsRemaining) {
-      // full colour spoon — still have this spoon
-      tint(255, 255, 255);
-    } else {
-      // faded/greyed out — spoon has been spent
-      tint(255, 255, 255, 80);
-    }
-
-    image(spoonImg, x, startY, spoonSize, spoonSize);
+  // How many spoons will the hovered option cost?
+  let previewCost = 0;
+  if ((dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") &&
+      selectedOption !== -1 && activeNPC) {
+    const opt = activeNPC.dialogue.options[selectedOption];
+    if (opt) previewCost = opt.cost;
   }
 
-  // always reset tint after so nothing else is affected
+  for (let i = 0; i < 7; i++) {
+    const x = startX + i * (spoonSize + gap);
+    // spoons in the range [spoonsRemaining - previewCost, spoonsRemaining) will be spent
+    const willBeSpent = previewCost > 0 &&
+                        i >= spoonsRemaining - previewCost &&
+                        i < spoonsRemaining;
+
+    if (willBeSpent) {
+      // all cost spoons bob together, slowly
+      const bobY = sin(frameCount * 0.05) * 5;
+      // pass 1: tight red outline
+      drawingContext.shadowColor = "rgba(220, 35, 35, 1)";
+      drawingContext.shadowBlur = 3;
+      image(spoonImg, x, startY + bobY, spoonSize, spoonSize);
+      // pass 2: wider red glow outlining the outline
+      drawingContext.shadowBlur = 16;
+      image(spoonImg, x, startY + bobY, spoonSize, spoonSize);
+      // pass 3: clean cookie on top
+      drawingContext.shadowColor = "transparent";
+      drawingContext.shadowBlur = 0;
+      image(spoonImg, x, startY + bobY, spoonSize, spoonSize);
+    } else if (i < spoonsRemaining) {
+      tint(255);
+      image(spoonImg, x, startY, spoonSize, spoonSize);
+    } else {
+      tint(255, 255, 255, 80);
+      image(spoonImg, x, startY, spoonSize, spoonSize);
+    }
+  }
+
   noTint();
 }
 
@@ -498,18 +525,61 @@ function drawPrompt() {
 
 //journal icon
 function drawJournalIcon() {
-  const ix = width - 60,
-    iy = 80,
-    iw = 44,
-    ih = 44;
+  const iw = 60;
+  const ih = 60;
+  const ix = width - iw - 16;
+  const iy = 50;
 
-  image(journalicon, ix, iy, iw, ih);
+  const hoveringJournal = mouseX > ix && mouseX < ix + iw &&
+                          mouseY > iy && mouseY < iy + ih;
+  const bobY = (journal.hasUnread || hoveringJournal)
+    ? sin(frameCount * 0.06) * 3
+    : 0;
 
+  // journal image: always a slight black outline, then gold glow when unread
+  drawingContext.shadowColor = "rgba(0, 0, 0, 0.85)";
+  drawingContext.shadowBlur = 4;
+  image(journalicon, ix, iy + bobY, iw, ih);
+  if (journal.hasUnread) {
+    drawingContext.shadowColor = "rgba(255, 195, 40, 0.9)";
+    drawingContext.shadowBlur = 20;
+    image(journalicon, ix, iy + bobY, iw, ih);
+  }
+  drawingContext.shadowColor = "transparent";
+  drawingContext.shadowBlur = 0;
+  image(journalicon, ix, iy + bobY, iw, ih);
+
+  // 'J' — gold with gold tight outline then gold glow
+  textAlign(CENTER, CENTER);
+  textSize(38);
+  drawingContext.shadowColor = "rgba(255, 195, 40, 1)";
+  drawingContext.shadowBlur = 3;
+  fill(255, 210, 50);
+  text("J", ix + iw / 2, iy + ih / 2 + bobY);
+  drawingContext.shadowBlur = 12;
+  text("J", ix + iw / 2, iy + ih / 2 + bobY);
+  drawingContext.shadowColor = "transparent";
+  drawingContext.shadowBlur = 0;
+  text("J", ix + iw / 2, iy + ih / 2 + bobY);
+
+  // unread dot
   if (journal.hasUnread) {
     noStroke();
     fill(210, 50, 50);
-    ellipse(ix + 5, iy + 5, 14, 14);
+    ellipse(ix + 8, iy + 8 + bobY, 14, 14);
   }
+
+}
+
+function drawDayCounter() {
+  textAlign(RIGHT, TOP);
+  textSize(24);
+  drawingContext.shadowColor = "rgba(0, 0, 0, 0.95)";
+  drawingContext.shadowBlur = 4;
+  fill(255, 210, 50);
+  text(`Day ${currentDay}/${TOTAL_DAYS}`, width - 14, 12);
+  drawingContext.shadowColor = "transparent";
+  drawingContext.shadowBlur = 0;
 }
 
 function isMouseOverNPC(npc) {
@@ -544,8 +614,9 @@ function updateHoverCursor() {
       hovering = true;
   }
 
-  // Dialogue choice buttons — also update selectedOption on hover
+  // Dialogue choice buttons — reset each frame, set on hover
   if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
+    selectedOption = -1;
     const btnW = 1080 / 3;
     const btnH = 241 / 3;
     const btnX = width * 0.6;
@@ -635,16 +706,12 @@ function keyPressed() {
       }
     } else if (dialoguePhase === "opening") {
       dialoguePhase = "choosing";
-    } else if (dialoguePhase === "choosing") {
-      confirmChoice();
     } else if (dialoguePhase === "repeat") {
       if (spoonsRemaining === 0) {
         closeDialogue();
       } else {
         dialoguePhase = "repeat-choosing";
       }
-    } else if (dialoguePhase === "repeat-choosing") {
-      confirmChoice();
     } else if (dialoguePhase === "response") {
       dialoguePhase = "monologue";
       startTypewriter(chosenOption.monologue);
@@ -666,24 +733,6 @@ function keyPressed() {
     }
   }
 
-  // navigate buttons with W / S
-  if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing") {
-    let visibleIndices = getVisibleOptionIndices();
-    if (visibleIndices.length === 0) return;
-
-    let currentPos = visibleIndices.indexOf(selectedOption);
-    if (currentPos === -1) currentPos = 0;
-
-    if (key === "w" || key === "W") {
-      let newPos =
-        (currentPos - 1 + visibleIndices.length) % visibleIndices.length;
-      selectedOption = visibleIndices[newPos];
-    }
-    if (key === "s" || key === "S") {
-      let newPos = (currentPos + 1) % visibleIndices.length;
-      selectedOption = visibleIndices[newPos];
-    }
-  }
 }
 
 function mousePressed() {
