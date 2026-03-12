@@ -81,6 +81,7 @@ class Journal {
       textStyle(NORMAL);
       textFont(jersey10Font); // reset at the end
     }
+    textFont(jersey10Font);
 
     this.drawArrows();
   }

@@ -85,8 +85,9 @@ function drawHomePage() {
     "You have to find the real killer to clear your name and continue on your journey.\n\n" +
     "How to play:\n" +
     "- Use WASD to move around.\n" +
-    "- Make choices carefully - each choice costs a different number of spoons and may have consequences.\n" +
-    "- A day ends when your spoons run out.";
+    "- Make choices carefully - each choice costs a different number of cookies and may have consequences.\n" +
+    "- Use J or Press the Journal Icon to see your notes \n" +
+    "- A day ends when your cookies run out.";
 
   const padding = 20;
   text(

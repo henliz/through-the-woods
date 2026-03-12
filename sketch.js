@@ -61,7 +61,7 @@ function preload() {
 
   // journal pages
   doctorPg = loadImage("assets/journal/Krisia_journal.png");
-  rmPg = loadImage("journalPages/RM Profile.png");
+  rmPg = loadImage("assets/journal/Jerome_journal.png");
   innkeeperPg = loadImage("assets/journal/Mrs.Gustall_journal.png");
   fdlPg = loadImage("assets/journal/Helen_journal.png");
   evidencePg = loadImage("assets/journal/Evidence_journal.png");
@@ -402,7 +402,7 @@ function windowResized() {
 function drawSpoonCounter() {
   let spoonSize = 70; // size of each spoon icon
   let gap = 0.5; // gap between spoons
-  let startX = width * 0.7; // left padding from screen edge
+  let startX = width * 0.65; // left padding from screen edge
   let startY = 10; // top padding from screen edge
 
   for (let i = 0; i < 7; i++) {
