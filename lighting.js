@@ -56,10 +56,10 @@ function _w2s(wx, wy) {
 // Draw one screen-mode light circle (brightens whatever is beneath it)
 function _screenLight(ctx, sx, sy, r) {
   const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-  g.addColorStop(0,    'rgba(140, 110, 170, 1)');
-  g.addColorStop(0.25, 'rgba(110, 85,  145, 0.8)');
-  g.addColorStop(0.55, 'rgba(70,  55,  105, 0.4)');
-  g.addColorStop(1,    'rgba(0,   0,   0,   0)');
+  g.addColorStop(0,    'rgba(60, 45, 80, 0.45)');
+  g.addColorStop(0.35, 'rgba(40, 30, 58, 0.22)');
+  g.addColorStop(0.65, 'rgba(18, 13, 30, 0.08)');
+  g.addColorStop(1,    'rgba(0,  0,  0,  0)');
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.arc(sx, sy, r, 0, Math.PI * 2);
