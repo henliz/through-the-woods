@@ -1,4 +1,5 @@
 const doctorDialogue = {
+  name: "Doctor Krisia",
   opening: "Oh hi. Sorry, I'm still trying to process what happened.",
   repeatLine: "I don't really have anything else to say right now.",
   hesitationLine: "I'm too drained to approach her right now…",
@@ -36,6 +37,8 @@ const doctorDialogue = {
 
 const doctor = new NPC(600, 450, doctorDialogue);
 doctor.journalPageIndex = 1;
+doctor.portraitKey = "doctor";
+doctor.currentEmotion = "idle";
 doctor.waypoints = [
   { x: 600, y: 450 },
   { x: 800, y: 450 },

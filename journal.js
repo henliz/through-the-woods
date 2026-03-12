@@ -61,23 +61,25 @@ class Journal {
 
   display() {
     if (!this.isOpen) return;
+    textFont(journalFont);
 
     let page = this.pages[this.openPage];
-    image(page.baseImage, 100, 50, width - 200, height - 100);
+    image(page.baseImage, width * 0.29, height * 0.15, 650, 650);
 
     if (page.textEntries.length > 0) {
-      let entryX = 750;
+      let entryX = width * 0.29 + 350;
       let entryY = 250;
-      let entryW = width - 260;
+      let entryW = 650 / 2 - 90;
 
       fill(40, 20, 10);
-      textSize(14);
+      textSize(18);
       textAlign(LEFT, TOP);
       textStyle(ITALIC);
       for (let i = 0; i < page.textEntries.length; i++) {
-        text("• " + page.textEntries[i], entryX, entryY + i * 30, entryW, 28);
+        text("• " + page.textEntries[i], entryX, entryY + i * 75, entryW, 200);
       }
       textStyle(NORMAL);
+      textFont(jersey10Font); // reset at the end
     }
 
     this.drawArrows();
@@ -87,20 +89,20 @@ class Journal {
     noStroke();
 
     fill(this.openPage > 0 ? color(160, 120, 80) : color(100, 100, 100, 60));
-    rect(110, height / 2, 30, 30, 4);
-    fill(this.openPage > 0 ? 255 : 150);
+    rect(width * 0.28, height / 2, 30, 30, 4);
+    fill(this.openPage > 0 ? 255 : 190);
     textSize(18);
     textAlign(CENTER, CENTER);
-    text("‹", 125, height / 2 + 15);
+    text("‹", width * 0.29, height / 2 + 15);
 
     fill(
       this.openPage < this.totalPages - 1
         ? color(160, 120, 80)
         : color(100, 100, 100, 60),
     );
-    rect(width - 140, height / 2, 30, 30, 4);
+    rect(width * 0.28 + 650, height / 2, 30, 30, 4);
     fill(this.openPage < this.totalPages - 1 ? 255 : 150);
-    text("›", width - 125, height / 2 + 15);
+    text("›", width * 0.29 + 650, height / 2 + 15);
   }
 
   handleClick(mx, my) {
