@@ -441,7 +441,7 @@ function drawPrompt() {
       let msgW = textWidth(msg) + 20;
       let msgH = 24;
       let msgX = screenX - msgW / 2;
-      let msgY = screenY - 50;
+      let msgY = screenY - 90;
 
       fill(0, 0, 0, 180); // semi-transparent dark background
       noStroke();
