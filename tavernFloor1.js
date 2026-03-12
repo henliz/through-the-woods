@@ -5,7 +5,7 @@
 let floorImg;
 let wallImgs = [];
 let wallCorner;
-let wallDoor;         // optional (not used yet)
+let wallDoor; // optional (not used yet)
 let insideSideWall;
 
 const TF1_S = 32;
@@ -13,7 +13,7 @@ const TF1_SCALE = 4;
 const TF1_T = TF1_S * TF1_SCALE; // 128px per tile
 
 // Back wall overlap into floor edge (how much the wall "sits" on the floor line)
-const BACK_WALL_OVERLAP = Math.floor(TF1_T * 0.20);
+const BACK_WALL_OVERLAP = Math.floor(TF1_T * 0.2);
 
 // ✅ More overlap between segments to hide seams
 const WALL_OVERLAP_PX = 8; // try 6..10
@@ -35,19 +35,21 @@ const CORNER_Y_NUDGE = Math.floor(TF1_T * 0.35);
 
 // ── MULTI-ROOM CONNECTED FLOORPLAN ─────────────────────────────────────────
 const TF1_FLOOR_MASK = [
+  "001111000111100",
+  "001111000111100",
   "000011111110000",
   "000011111110000",
-  "000011111110000",
-  "000000011000000",
-  "001111111111100",
-  "001111111111100",
-  "001111111111100",
-  "000000011000000",
-  "000111011011100",
-  "000111011011100",
-  "000111011011100",
-  "000000011110000",
-  "000001111110000",
+  "011111111111110",
+  "011101111101110",
+  "000001111100000", //
+  "000001111100000", //
+  "001111111111100", //
+  "001111111111100", //
+  "000001111100000",
+  "000001111100000",
+  "001111111111100", //
+  "001111111111100", //
+  "001111111111100", //
 ];
 
 let TF1_W = 0;
@@ -65,7 +67,7 @@ function tf1Preload() {
   ];
 
   wallCorner = loadImage("assets/walls/wall_corner.png");
-  wallDoor   = loadImage("assets/walls/wall_door.png"); // optional
+  wallDoor = loadImage("assets/walls/wall_door.png"); // optional
 
   insideSideWall = loadImage("assets/walls/external_side_wall.png");
 }
@@ -114,7 +116,9 @@ function wallVariantForPixel(xPx, row) {
  */
 function wallBaselineY(yFloorTop, img) {
   const dh = img.height * TF1_SCALE;
-  return (yFloorTop - dh + BACK_WALL_OVERLAP) + CORNER_Y_NUDGE - BACK_WALL_RAISE_PX;
+  return (
+    yFloorTop - dh + BACK_WALL_OVERLAP + CORNER_Y_NUDGE - BACK_WALL_RAISE_PX
+  );
 }
 
 /**
@@ -138,8 +142,14 @@ function drawBackWallTile(img, xLeft, yFloorTop, destW = TF1_T) {
 
   image(
     img,
-    xLeft, y, effectiveDestW, dh,   // dest
-    sliceX, 0, srcW, img.height     // src
+    xLeft,
+    y,
+    effectiveDestW,
+    dh, // dest
+    sliceX,
+    0,
+    srcW,
+    img.height, // src
   );
 
   return effectiveDestW;
@@ -187,6 +197,18 @@ function drawSideWallStrip(img, x, yTop, height, flipX) {
   pop();
 }
 
+function hasTopOuterCorner(col, row, side) {
+  if (!isFloor(col, row) || isFloor(col, row - 1)) return false;
+
+  if (side === "left") {
+    return !isFloor(col - 1, row);
+  }
+  if (side === "right") {
+    return !isFloor(col + 1, row);
+  }
+  return false;
+}
+
 function tf1Draw(worldX = 0, worldY = 0) {
   // 1) FLOOR
   for (let r = 0; r < TF1_H; r++) {
@@ -203,7 +225,7 @@ function tf1Draw(worldX = 0, worldY = 0) {
     // LEFT segments
     let segStart = null;
     for (let r = 0; r <= TF1_H; r++) {
-      const edgeHere = (r < TF1_H) && isFloor(c, r) && !isFloor(c - 1, r);
+      const edgeHere = r < TF1_H && isFloor(c, r) && !isFloor(c - 1, r);
       if (edgeHere && segStart === null) segStart = r;
 
       if ((!edgeHere || r === TF1_H) && segStart !== null) {
@@ -219,13 +241,14 @@ function tf1Draw(worldX = 0, worldY = 0) {
     // RIGHT segments
     segStart = null;
     for (let r = 0; r <= TF1_H; r++) {
-      const edgeHere = (r < TF1_H) && isFloor(c, r) && !isFloor(c + 1, r);
+      const edgeHere = r < TF1_H && isFloor(c, r) && !isFloor(c + 1, r);
       if (edgeHere && segStart === null) segStart = r;
 
       if ((!edgeHere || r === TF1_H) && segStart !== null) {
         const segRows = r - segStart;
         const sw = insideSideWall.width * TF1_SCALE;
-        const x = worldX + (c + 1) * TF1_T - sw + SIDE_EDGE_PAD + SIDE_WALL_X_NUDGE;
+        const x =
+          worldX + (c + 1) * TF1_T - sw + SIDE_EDGE_PAD + SIDE_WALL_X_NUDGE;
         const yTop = worldY + segStart * TF1_T + SIDE_WALL_START_DROP;
         const h = segRows * TF1_T - SIDE_WALL_START_DROP;
         if (h > 0) drawSideWallStrip(insideSideWall, x, yTop, h, false);
@@ -241,18 +264,28 @@ function tf1Draw(worldX = 0, worldY = 0) {
     let c = 0;
     while (c < TF1_W) {
       const startsRun = isFloor(c, r) && !isFloor(c, r - 1);
-      if (!startsRun) { c++; continue; }
+      if (!startsRun) {
+        c++;
+        continue;
+      }
 
       let c0 = c;
       let c1 = c;
-      while (c1 + 1 < TF1_W && isFloor(c1 + 1, r) && !isFloor(c1 + 1, r - 1)) c1++;
+      while (c1 + 1 < TF1_W && isFloor(c1 + 1, r) && !isFloor(c1 + 1, r - 1))
+        c1++;
 
       const yFloorTop = worldY + r * TF1_T;
       const runX0 = worldX + c0 * TF1_T;
       const runX1 = worldX + (c1 + 1) * TF1_T;
 
-      let x = runX0 + cornerW;
-      const xStop = runX1 - cornerW;
+      // 关键优化：
+      // 只有这一端真的会画 corner，才给 back wall 预留 cornerW。
+      // 内凹 / L 形横边通常不会两侧都画 corner，不能固定两头都扣掉。
+      const reserveLeft = hasTopOuterCorner(c0, r, "left") ? cornerW : 0;
+      const reserveRight = hasTopOuterCorner(c1, r, "right") ? cornerW : 0;
+
+      let x = runX0 + reserveLeft;
+      const xStop = runX1 - reserveRight;
 
       while (x < xStop - 1) {
         const seg = wallVariantForPixel(x - worldX, r);
@@ -267,7 +300,7 @@ function tf1Draw(worldX = 0, worldY = 0) {
         drawBackWallTile(seg, drawX, yFloorTop, want);
 
         // advance by tile width (minus overlap so seams stay hidden)
-        x += (TF1_T - WALL_OVERLAP_PX);
+        x += TF1_T - WALL_OVERLAP_PX;
       }
 
       c = c1 + 1;
@@ -280,13 +313,13 @@ function tf1Draw(worldX = 0, worldY = 0) {
       if (!isFloor(c, r)) continue;
       if (isFloor(c, r - 1)) continue;
 
-      const leftVoid  = !isFloor(c - 1, r);
+      const leftVoid = !isFloor(c - 1, r);
       const rightVoid = !isFloor(c + 1, r);
 
       const x = worldX + c * TF1_T;
       const y = worldY + r * TF1_T;
 
-      if (leftVoid)  drawCorner(wallCorner, x, y, true);
+      if (leftVoid) drawCorner(wallCorner, x, y, true);
       if (rightVoid) drawCorner(wallCorner, x, y, false);
     }
   }
@@ -305,8 +338,8 @@ window.tf1MarkSolidRect = function (tileX, tileY, wTiles, hTiles) {
 
 // Expose globally
 window.tf1Preload = tf1Preload;
-window.tf1Setup   = tf1Setup;
-window.tf1Draw    = tf1Draw;
+window.tf1Setup = tf1Setup;
+window.tf1Draw = tf1Draw;
 window.tf1IsSolidAtPixel = tf1IsSolidAtPixel;
 
 window.TF1_T = TF1_T;

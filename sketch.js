@@ -205,6 +205,8 @@ function setup() {
   journalTextC = color(255);
 
   tf1Setup();
+  // once the floor/tile system exists we can place our furniture
+  clutterSetup();
 
   player = new Player();
   player.dir = DIR.down;
@@ -301,22 +303,22 @@ function updatePlayer() {
   let vx = 0,
     vy = 0;
 
-  if (keyIsDown(65)) {
+  if (keyIsDown(65) || keyIsDown(LEFT_ARROW)) {
     vx -= 1;
     player.dir = DIR.left;
-  } // A
-  if (keyIsDown(68)) {
+  } // A or Left Arrow
+  if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)) {
     vx += 1;
     player.dir = DIR.right;
-  } // D
-  if (keyIsDown(87)) {
+  } // D or Right Arrow
+  if (keyIsDown(87) || keyIsDown(UP_ARROW)) {
     vy -= 1;
     player.dir = DIR.up;
-  } // W
-  if (keyIsDown(83)) {
+  } // W or Up Arrow
+  if (keyIsDown(83) || keyIsDown(DOWN_ARROW)) {
     vy += 1;
     player.dir = DIR.down;
-  } // S
+  } // S or Down Arrow
 
   player.moving = vx !== 0 || vy !== 0;
 
@@ -356,6 +358,8 @@ function circleHitsSolid(cx, cy, r) {
   }
 
   if (playerHitsNPC(cx, cy, r)) return true;
+  if (checkCollision(cx, cy, r)) return true;
+
   return false;
 }
 

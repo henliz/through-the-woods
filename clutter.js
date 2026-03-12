@@ -1,58 +1,459 @@
 // clutter.js
 // Simple props layer for tavern. Draws in WORLD SPACE.
+// Uses multi-asset loading framework to manage many furniture/prop images.
 
-let tableImg;
+// ============================================================
+// ASSET STORAGE & ASSET LIST
+// ============================================================
+
+/**
+ * clutterImages: Object to store all loaded PNG images
+ * Each key corresponds to a named asset (e.g., "table", "chair", "lamp")
+ */
+const clutterImages = {};
 
 const CLUTTER = []; // will hold placed props
 
-function clutterPreload() {
-  // ✅ Use the real path as it exists in YOUR project.
-  // If you copied the PNG into your project, prefer something like:
-  // "assets/clutter/tabless_6.png"
-  tableImg = loadImage(
-    "Epic RPG World - Village(interiors) V1.3/assets/furniture_and_props_sprites/tabless_6.png",
-    () => console.log("[clutter] table loaded:", tableImg.width, tableImg.height),
-    () => console.error("[clutter] FAILED to load table image (path wrong)")
-  );
+/**
+ * clutterAssetList: Array defining all assets to load
+ * Structure: { key: "name", path: "relative/path/to/image.png" }
+ */
+const clutterAssetList = [
+  //Lobby clutter
+  {
+    key: "bigtable1",
+    path: "assets/bigtable-5.png",
+  },
+  {
+    key: "sofa1",
+    path: "assets/walls/sofa-1.png",
+  },
+  {
+    key: "piano",
+    path: "assets/Piano.png",
+  },
+  {
+    key: "pianochair1",
+    path: "assets/pianochair.png",
+  },
+  {
+    key: "shelf1",
+    path: "assets/shelf-1.png",
+  },
+  {
+    key: "sofa2",
+    path: "assets/walls/sofa-3.png",
+  },
+  {
+    key: "plant1",
+    path: "assets/plant-1.png",
+  },
+
+  //Travern clutter
+  {
+    key: "table1",
+    path: "assets/table-3.png",
+  },
+  {
+    key: "counter1",
+    path: "assets/counter-4.png",
+  },
+
+  {
+    key: "pillar",
+    path: "assets/pillar-2.png",
+  },
+  {
+    key: "stool1",
+    path: "assets/stool-1.png",
+  },
+  {
+    key: "stool2",
+    path: "assets/stool-2.png",
+  },
+  {
+    key: "stool3",
+    path: "assets/stool-1.png",
+  },
+
+  //Room 1
+  {
+    key: "bed1",
+    path: "assets/bed-5.png",
+  },
+  {
+    key: "cabinet1",
+    path: "assets/cabinet.png",
+  },
+
+  //Room 2
+  {
+    key: "bed2",
+    path: "assets/bed-2.png",
+  },
+  {
+    key: "shelf3",
+    path: "assets/shelf-3.png",
+  },
+  //Room 3
+  {
+    key: "bed3",
+    path: "assets/bed-4.png",
+  },
+  {
+    key: "shelf2",
+    path: "assets/shelf-2.png",
+  },
+
+  //Little Red Room Door
+  {
+    key: "door1",
+    path: "assets/door-1.png",
+  },
+
+  //office clutter
+  {
+    key: "desk",
+    path: "assets/desk.png",
+  },
+  {
+    key: "deskchair",
+    path: "assets/deskchair.png",
+  },
+  {
+    key: "painting",
+    path: "assets/painting.png",
+  },
+  {
+    key: "bigtable2",
+    path: "assets/bigtable-4.png",
+  },
+  {
+    key: "TV",
+    path: "assets/TV.png",
+  },
+  {
+    key: "cabinet2",
+    path: "assets/cabinet-2.png",
+  },
+];
+
+const roomLayout = [
+  // Tavern clutter setting
+  {
+    asset: "table1",
+    tileX: 3,
+    tileY: 7.5,
+    scale: 4,
+    anchor: "top-left",
+  },
+  {
+    asset: "counter1",
+    tileX: 11,
+    tileY: 8,
+    scale: 4,
+    anchor: "top-right",
+  },
+  {
+    asset: "pillar",
+    tileX: 12,
+    tileY: 8,
+    scale: 3,
+    anchor: "bottom",
+  },
+  {
+    asset: "stool1",
+    tileX: 10.5,
+    tileY: 6.8,
+    scale: 3,
+    anchor: "top-left",
+  },
+  {
+    asset: "stool2",
+    tileX: 9.8,
+    tileY: 6.8,
+    scale: 3,
+    anchor: "top-left",
+  },
+  {
+    asset: "stool3",
+    tileX: 11,
+    tileY: 6.8,
+    scale: 3,
+    anchor: "top-left",
+  },
+
+  //Lobby clutter setting
+  {
+    asset: "bigtable1",
+    tileX: 3,
+    tileY: 13.3,
+    scale: 7,
+    anchor: "top-left",
+  },
+  {
+    asset: "piano",
+    tileX: 10,
+    tileY: 13.6,
+    scale: 5,
+    anchor: "top-left",
+  },
+  {
+    asset: "pianochair1",
+    tileX: 10.4,
+    tileY: 14.3,
+    scale: 4,
+    anchor: "top-left",
+  },
+  {
+    asset: "plant1",
+    tileX: 10.4,
+    tileY: 12,
+    scale: 5,
+    anchor: "top-left",
+  },
+  {
+    asset: "sofa1",
+    tileX: 11,
+    tileY: 12,
+    scale: 6,
+    anchor: "top-left",
+  },
+
+  {
+    asset: "shelf1",
+    tileX: 2.8,
+    tileY: 11.5,
+    scale: 4.3,
+    anchor: "top-left",
+  },
+  {
+    asset: "sofa2",
+    tileX: 3.7,
+    tileY: 12,
+    scale: 6,
+    anchor: "top-left",
+  },
+
+  //Room 1 cultter setting
+  {
+    asset: "bed1",
+    tileX: 1.6,
+    tileY: 4,
+    scale: 6,
+    anchor: "top-left",
+  },
+  {
+    asset: "cabinet1",
+    tileX: 2.6,
+    tileY: 3.6,
+    scale: 4,
+    anchor: "bottom",
+  },
+
+  //Room 2 clutter setting
+  {
+    asset: "bed2",
+    tileX: 11.8,
+    tileY: 0.7,
+    scale: 6,
+    anchor: "bottom",
+  },
+  {
+    asset: "shelf3",
+    tileX: 10.4,
+    tileY: 0,
+    scale: 6,
+    anchor: "bottom",
+  },
+
+  //Room 3 clutter setting
+  {
+    asset: "bed3",
+    tileX: 2.6,
+    tileY: 0.6,
+    scale: 5,
+    anchor: "bottom",
+  },
+  {
+    asset: "shelf2",
+    tileX: 4.2,
+    tileY: 0,
+    scale: 6,
+    anchor: "bottom",
+  },
+
+  //Little Red Room Door setting
+
+  {
+    asset: "door1",
+    tileX: 7.3,
+    tileY: 1.3,
+    scale: 5,
+    anchor: "bottom",
+  },
+
+  //office clutter setting
+  {
+    asset: "desk",
+    tileX: 13,
+    tileY: 5,
+    scale: 7,
+    anchor: "top-left",
+  },
+  {
+    asset: "deskchair",
+    tileX: 12.6,
+    tileY: 5.1,
+    scale: 4,
+    anchor: "top-left",
+  },
+  {
+    asset: "painting",
+    tileX: 11.6,
+    tileY: 2.5,
+    scale: 4,
+    anchor: "bottom",
+  },
+  {
+    asset: "bigtable2",
+    tileX: 12.4,
+    tileY: 3.7,
+    scale: 4,
+    anchor: "top-left",
+  },
+  {
+    asset: "TV",
+    tileX: 12.5,
+    tileY: 3.5,
+    scale: 3,
+    anchor: "top-left",
+  },
+  {
+    asset: "cabinet2",
+    tileX: 11.8,
+    tileY: 3.7,
+    scale: 3,
+    anchor: "top-left",
+  },
+];
+
+// ============================================================
+// HELPER: Get position and size for a prop
+// ============================================================
+
+function getPropPosition(f, worldX = 0, worldY = 0) {
+  const T = window.TF1_T ?? 128;
+  const img = f.img || clutterImages[f.asset];
+  if (!img) return null;
+
+  const dw = img.width * (f.scale ?? 4);
+  const dh = img.height * (f.scale ?? 4);
+
+  const x = worldX + f.tileX * T;
+  const y = worldY + f.tileY * T;
+
+  let actualX = x;
+  let actualY = y;
+  if (f.anchor === "bottom") {
+    actualY = y + T - dh;
+  }
+
+  return { actualX, actualY, dw, dh };
 }
+
+// ============================================================
+// COLLISON: Checko if player collides with any clutter props. Returns true if collision detected.
+// ============================================================
+
+function checkCollision(playerNextX, playerNextY, playerR) {
+  let radius = playerR;
+
+  for (const f of roomLayout) {
+    const pos = getPropPosition(f);
+    if (!pos) continue;
+
+    // Bounding box of the prop
+    const left = pos.actualX;
+    const right = pos.actualX + pos.dw;
+    const top = pos.actualY;
+    const bottom = pos.actualY + pos.dh;
+
+    // Find closest point on rectangle to circle center
+    const closestX = Math.max(left, Math.min(playerNextX, right));
+    const closestY = Math.max(top, Math.min(playerNextY, bottom));
+
+    // Distance from circle center to closest point
+    const distX = playerNextX - closestX;
+    const distY = playerNextY - closestY;
+    const distance = Math.sqrt(distX * distX + distY * distY);
+
+    if (distance <= radius) {
+      return true; // Collision detected
+    }
+  }
+  return false; // No collision
+}
+
+// ============================================================
+// PRELOAD: Load all assets from the list
+// ============================================================
+
+function clutterPreload() {
+  // Loop through asset list and load each image
+  for (const asset of clutterAssetList) {
+    clutterImages[asset.key] = loadImage(
+      asset.path,
+      () => console.log(`[clutter] loaded: ${asset.key}`),
+      () => console.error(`[clutter] FAILED to load: ${asset.key}`),
+    );
+  }
+}
+
+// ============================================================
+// SETUP: Place props in the scene
+// ============================================================
 
 function clutterSetup() {
-  // Place it in the big main room:
-  // Pick a tile coordinate that you know is floor.
-  // These are in TILE units of your floor mask.
+  // Clear previous clutter
   CLUTTER.length = 0;
-  CLUTTER.push({
-    img: tableImg,
-    tileX: 6,
-    tileY: 5,
-    scale: (window.TF1_SCALE ?? 4), // fall back to 4
-    anchor: "bottom" // looks nicer for furniture
-  });
+
+  // Place props from roomLayout
+  for (const item of roomLayout) {
+    const img = clutterImages[item.asset];
+    if (!img) {
+      console.warn(`Image for ${item.asset} not loaded`);
+      continue;
+    }
+    CLUTTER.push({
+      img: img,
+      tileX: item.tileX,
+      tileY: item.tileY,
+      scale: window.TF1_SCALE ?? item.scale ?? 4,
+      anchor: item.anchor || "bottom",
+    });
+  }
 }
 
+// ============================================================
+// DRAW: Render all props in the CLUTTER array
+// ============================================================
+
 function clutterDraw(worldX = 0, worldY = 0) {
-  if (!tableImg) return;
-
-  // We rely on your tavernFloor1 globals
-  const T = window.TF1_T ?? 128;
-
+  // Loop through all placed props and draw each one
   for (const p of CLUTTER) {
     if (!p.img) continue;
 
-    const dw = p.img.width * (p.scale ?? 4);
-    const dh = p.img.height * (p.scale ?? 4);
+    const pos = getPropPosition(p, worldX, worldY);
+    if (!pos) continue;
 
-    const x = worldX + p.tileX * T;
-    const y = worldY + p.tileY * T;
-
-    // bottom-anchor so it sits on the floor nicely
-    if (p.anchor === "bottom") {
-      image(p.img, x, y + T - dh, dw, dh);
-    } else {
-      image(p.img, x, y, dw, dh);
-    }
+    image(p.img, pos.actualX, pos.actualY, pos.dw, pos.dh);
   }
 }
+
+// ============================================================
+// EXPOSE TO P5 GLOBAL MODE
+// ============================================================
 
 // expose to p5 global mode
 window.clutterPreload = clutterPreload;
