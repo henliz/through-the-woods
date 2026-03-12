@@ -5,6 +5,38 @@ let spoonsRemaining = 7; // spoon budget for the day
 let chosenOption = null; // stores the option the player picked
 const tooTiredLine = "Gosh… I couldn't bring myself to ask them that."; // dialogue for when you don't have enough spoons to choose a dialogue option
 
+// Typewriter effect state
+let typewriterTarget = "";
+let typewriterIndex = 0;
+let typewriterDone = true;
+let typewriterFrame = 0;
+const TYPEWRITER_SPEED = 2; // frames per character (~30 chars/sec at 60fps)
+
+function startTypewriter(text) {
+  typewriterTarget = text || "";
+  typewriterIndex = 0;
+  typewriterFrame = 0;
+  typewriterDone = typewriterTarget.length === 0;
+}
+
+function skipTypewriter() {
+  typewriterIndex = typewriterTarget.length;
+  typewriterDone = true;
+}
+
+function tickTypewriter() {
+  if (typewriterDone) return;
+  typewriterFrame++;
+  if (typewriterFrame >= TYPEWRITER_SPEED) {
+    typewriterFrame = 0;
+    typewriterIndex++;
+    if (typewriterIndex >= typewriterTarget.length) {
+      typewriterIndex = typewriterTarget.length;
+      typewriterDone = true;
+    }
+  }
+}
+
 function openDialogue(npc) {
   activeNPC = npc;
 
@@ -14,13 +46,16 @@ function openDialogue(npc) {
 
   if (spoonsRemaining === 0) {
     dialoguePhase = "hesitation"; // too tired to talk to anyone
+    startTypewriter(npc.dialogue.hesitationLine);
     return;
   }
 
   if (npc.firstVisit) {
     dialoguePhase = "opening";
+    startTypewriter(npc.dialogue.opening);
   } else {
     dialoguePhase = "repeat";
+    startTypewriter(npc.dialogue.repeatLine);
   }
 }
 
@@ -35,6 +70,7 @@ function closeDialogue() {
 
 function drawDialogue() {
   if (dialoguePhase === "closed") return;
+  tickTypewriter();
 
   let boxW = 1857 / 3; // control width only
   let boxH = 681 / 3; // height follows aspect ratio
@@ -141,13 +177,14 @@ function drawDialogueText(boxX, boxY, boxW, boxH) {
   // text starts after the portrait width so it doesn't overlap
   let textX = boxX + 50;
   let textW = boxW - 75;
+  let revealed = typewriterTarget.substring(0, typewriterIndex);
 
   if (dialoguePhase === "hesitation") {
     fill(255);
     textStyle(ITALIC);
     textSize(30);
     textAlign(LEFT, TOP);
-    text(activeNPC.dialogue.hesitationLine, textX, boxY + 40, textW, boxH - 80);
+    text(revealed, textX, boxY + 40, textW, boxH - 80);
     textStyle(NORMAL);
     return;
   }
@@ -157,7 +194,7 @@ function drawDialogueText(boxX, boxY, boxW, boxH) {
     textStyle(ITALIC);
     textSize(30);
     textAlign(LEFT, TOP);
-    text(chosenOption.monologue, textX, boxY + 40, textW, boxH - 80);
+    text(revealed, textX, boxY + 40, textW, boxH - 80);
     textStyle(NORMAL);
     return;
   }
@@ -166,17 +203,14 @@ function drawDialogueText(boxX, boxY, boxW, boxH) {
   textSize(30);
   textAlign(LEFT, TOP);
 
-  if (dialoguePhase === "opening") {
-    text(activeNPC.dialogue.opening, textX, boxY + 40, textW, boxH - 80);
-  }
-  if (dialoguePhase === "choosing") {
-    text(activeNPC.dialogue.opening, textX, boxY + 40, textW, boxH - 80);
+  if (dialoguePhase === "opening" || dialoguePhase === "choosing") {
+    text(revealed, textX, boxY + 40, textW, boxH - 80);
   }
   if (dialoguePhase === "repeat" || dialoguePhase === "repeat-choosing") {
-    text(activeNPC.dialogue.repeatLine, textX, boxY + 40, textW, boxH - 80);
+    text(revealed, textX, boxY + 40, textW, boxH - 80);
   }
   if (dialoguePhase === "response" && chosenOption) {
-    text(chosenOption.npcResponse, textX, boxY + 40, textW, boxH - 80);
+    text(revealed, textX, boxY + 40, textW, boxH - 80);
   }
 }
 
@@ -184,6 +218,8 @@ function drawEnterHint(boxX, boxY, boxW, boxH) {
   // don't show during choosing — player knows to use W/S/Enter
   if (dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing")
     return;
+  // don't show until text has fully revealed
+  if (!typewriterDone) return;
 
   fill(255, 255, 255, 200);
   textSize(18);
@@ -260,6 +296,7 @@ function confirmChoice() {
       npcResponse: null,
     };
     dialoguePhase = "monologue";
+    startTypewriter(tooTiredLine);
     return;
   }
 
@@ -285,6 +322,7 @@ function confirmChoice() {
   }
 
   dialoguePhase = "response";
+  startTypewriter(option.npcResponse);
 }
 
 function bedtime() {
@@ -330,3 +368,5 @@ window.closeDialogue = closeDialogue;
 window.drawDialogue = drawDialogue;
 window.dialoguePhase = dialoguePhase;
 window.bedtime = bedtime;
+window.startTypewriter = startTypewriter;
+window.skipTypewriter = skipTypewriter;

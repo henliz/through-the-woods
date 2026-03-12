@@ -546,6 +546,13 @@ function keyPressed() {
   }
 
   if (keyCode === ENTER) {
+    // If text is still animating, skip to full text instead of advancing
+    const choosingPhase = dialoguePhase === "choosing" || dialoguePhase === "repeat-choosing";
+    if (!typewriterDone && dialoguePhase !== "closed" && !choosingPhase) {
+      skipTypewriter();
+      return;
+    }
+
     if (dialoguePhase === "closed") {
       for (let npc of npcs) {
         if (npc.isPlayerNearby(player)) {
@@ -567,6 +574,7 @@ function keyPressed() {
       confirmChoice();
     } else if (dialoguePhase === "response") {
       dialoguePhase = "monologue";
+      startTypewriter(chosenOption.monologue);
     } else if (dialoguePhase === "monologue") {
       if (!chosenOption) {
         closeDialogue();
@@ -578,6 +586,7 @@ function keyPressed() {
         closeDialogue();
       } else {
         dialoguePhase = "repeat";
+        startTypewriter(activeNPC.dialogue.repeatLine);
       }
     } else if (dialoguePhase === "hesitation") {
       closeDialogue();
