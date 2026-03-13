@@ -57,7 +57,7 @@ let TF1_H = 0;
 let TF1_SOLID = []; // 1 = solid, 0 = walkable
 
 function tf1Preload() {
-  floorImg = loadImage("assets/walls/floor_full.png");
+  floorImg = loadImage("assets/walls/floor_full.png"); //reference [17]
 
   wallImgs = [
     loadImage("assets/walls/wall1.png"),

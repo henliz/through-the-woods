@@ -2,22 +2,17 @@
 // Simple props layer for tavern. Draws in WORLD SPACE.
 // Uses multi-asset loading framework to manage many furniture/prop images.
 
-// ============================================================
 // ASSET STORAGE & ASSET LIST
-// ============================================================
 
-/**
- * clutterImages: Object to store all loaded PNG images
- * Each key corresponds to a named asset (e.g., "table", "chair", "lamp")
- */
+//clutterImages: Object to store all loaded PNG images
+
 const clutterImages = {};
 
 const CLUTTER = []; // will hold placed props
 
-/**
- * clutterAssetList: Array defining all assets to load
- * Structure: { key: "name", path: "relative/path/to/image.png" }
- */
+//clutterAssetList: defining all assets to load
+//all assets from reference [11]
+
 const clutterAssetList = [
   //Lobby clutter
   {
@@ -338,9 +333,7 @@ const door1Layout = {
   interactRadius: 120, // radius (in pixels) where the player can interact
 };
 
-// ============================================================
 // HELPER: Get position and size for a prop
-// ============================================================
 
 function getPropPosition(f, worldX = 0, worldY = 0) {
   const T = window.TF1_T ?? 128;
@@ -376,9 +369,7 @@ function isPlayerNearDoor1(player) {
   return d < (door1Layout.interactRadius || 80);
 }
 
-// ============================================================
 // COLLISON: Check if player collides with any clutter props. Returns true if collision detected.
-// ============================================================
 
 function checkCollision(playerNextX, playerNextY, playerR) {
   let radius = playerR;
@@ -409,13 +400,13 @@ function checkCollision(playerNextX, playerNextY, playerR) {
   return false; // No collision
 }
 
-// ============================================================
 // PRELOAD: Load all assets from the list
-// ============================================================
 
 function clutterPreload() {
   // Loop through asset list and load each image
   for (const asset of clutterAssetList) {
+    //all assets from reference [11]
+
     clutterImages[asset.key] = loadImage(
       asset.path,
       () => console.log(`[clutter] loaded: ${asset.key}`),
@@ -424,9 +415,7 @@ function clutterPreload() {
   }
 }
 
-// ============================================================
 // SETUP: Place props in the scene
-// ============================================================
 
 function clutterSetup() {
   // Clear previous clutter
@@ -449,9 +438,7 @@ function clutterSetup() {
   }
 }
 
-// ============================================================
 // DRAW: Render all props in the CLUTTER array
-// ============================================================
 
 function clutterDraw(worldX = 0, worldY = 0) {
   // Loop through all placed props and draw each one
@@ -474,9 +461,7 @@ function clutterDraw(worldX = 0, worldY = 0) {
   }
 }
 
-// ============================================================
 // EXPOSE TO P5 GLOBAL MODE
-// ============================================================
 
 // expose to p5 global mode
 window.clutterPreload = clutterPreload;
