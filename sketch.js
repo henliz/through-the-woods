@@ -102,7 +102,7 @@ function preload() {
       angry: loadImage("assets/portraits/RM_angry.png"),
     },
   };
-  journalicon = loadImage("assets/bookicon.png");
+  journalicon = loadImage("assets/bookicon.png"); // reference 16
   // ui dialogue elements
   uiMainBox = loadImage("assets/ui elements/Main Dialogue Box.png");
   uiMonologueBox = loadImage("assets/ui elements/Inner Monologue Box.png");
