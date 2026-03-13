@@ -9,7 +9,7 @@ let wallDoor; // optional (not used yet)
 let insideSideWall;
 
 const TF1_S = 32;
-const TF1_SCALE = 3.2;           // 80% of original — scales tile rendering & world size
+const TF1_SCALE = 3.2; // 80% of original — scales tile rendering & world size
 const TF1_T = TF1_S * TF1_SCALE; // 102.4px per tile
 
 // Back wall overlap into floor edge (how much the wall "sits" on the floor line)
@@ -111,10 +111,8 @@ function wallVariantForPixel(xPx, row) {
   return wallVariantFor(col, row);
 }
 
-/**
- * ✅ Single baseline for BOTH corners and walls.
- * Corners look correct → align walls to this, but raise walls slightly.
- */
+//Single baseline for BOTH corners and walls.
+
 function wallBaselineY(yFloorTop, img) {
   const dh = img.height * TF1_SCALE;
   return (
@@ -122,12 +120,7 @@ function wallBaselineY(yFloorTop, img) {
   );
 }
 
-/**
- * ✅ Draw a back-wall segment as EXACTLY 1 tile wide (TF1_T),
- * by cropping a 32px slice out of the middle of wall1/2/3/4.
- *
- * No stretching, no “too wide” segments.
- */
+//Draw a back-wall segment as EXACTLY 1 tile wide
 function drawBackWallTile(img, xLeft, yFloorTop, destW = TF1_T) {
   const dh = img.height * TF1_SCALE;
   const y = wallBaselineY(yFloorTop, img);
@@ -279,9 +272,6 @@ function tf1Draw(worldX = 0, worldY = 0) {
       const runX0 = worldX + c0 * TF1_T;
       const runX1 = worldX + (c1 + 1) * TF1_T;
 
-      // 关键优化：
-      // 只有这一端真的会画 corner，才给 back wall 预留 cornerW。
-      // 内凹 / L 形横边通常不会两侧都画 corner，不能固定两头都扣掉。
       const reserveLeft = hasTopOuterCorner(c0, r, "left") ? cornerW : 0;
       const reserveRight = hasTopOuterCorner(c1, r, "right") ? cornerW : 0;
 
