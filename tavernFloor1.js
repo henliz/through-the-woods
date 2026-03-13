@@ -15,10 +15,10 @@ const TF1_T = TF1_S * TF1_SCALE; // 102.4px per tile
 // Back wall overlap into floor edge (how much the wall "sits" on the floor line)
 const BACK_WALL_OVERLAP = Math.floor(TF1_T * 0.2);
 
-// ✅ More overlap between segments to hide seams
+// More overlap between segments to hide seams
 const WALL_OVERLAP_PX = 6; // was 8
 
-// ✅ Raise the back walls so they align with corners
+// Raise the back walls so they align with corners
 const BACK_WALL_RAISE_PX = 51; // was 64
 
 const BACK_WALL_SHIFT_X = 6; // was 8
@@ -57,7 +57,7 @@ let TF1_H = 0;
 let TF1_SOLID = []; // 1 = solid, 0 = walkable
 
 function tf1Preload() {
-  floorImg = loadImage("assets/walls/floor_full.png"); //reference [17]
+  floorImg = loadImage("assets/walls/floor_full.png"); //reference [19]
 
   wallImgs = [
     loadImage("assets/walls/wall1.png"),

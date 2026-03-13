@@ -11,7 +11,7 @@ const clutterImages = {};
 const CLUTTER = []; // will hold placed props
 
 //clutterAssetList: defining all assets to load
-//all assets from reference [11]
+//all assets from reference [13]
 
 const clutterAssetList = [
   //Lobby clutter
@@ -405,7 +405,7 @@ function checkCollision(playerNextX, playerNextY, playerR) {
 function clutterPreload() {
   // Loop through asset list and load each image
   for (const asset of clutterAssetList) {
-    //all assets from reference [11]
+    //all assets from reference [13]
 
     clutterImages[asset.key] = loadImage(
       asset.path,
