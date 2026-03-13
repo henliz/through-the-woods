@@ -58,12 +58,12 @@ let prologueVideo;
 function preload() {
   tf1Preload();
   clutterPreload();
-  charSheet = loadImage("redridinghood.png");
+  charSheet = loadImage("redridinghood.png"); //reference [15]
   loadHomeAssets();
-  spoonImg = loadImage("assets/cookies.png");
-  innkeeperImg = loadImage("assets/innkeeper_sprite.png");
-  nunImg = loadImage("nuns.png");
-  runawayManImg = loadImage("assets/Jerome_spirtesheet.png");
+  spoonImg = loadImage("assets/cookies.png"); //reference [7]
+  innkeeperImg = loadImage("assets/innkeeper_sprite.png"); //reference [4]
+  nunImg = loadImage("nuns.png"); //reference [15]
+  runawayManImg = loadImage("assets/Jerome_spirtesheet.png"); //reference [2]
 
   // journal pages
   doctorPg = loadImage("assets/journal/Krisia_journal.png");
@@ -113,7 +113,7 @@ function preload() {
   jersey10Font = loadFont("assets/Jersey10-Regular.ttf");
   journalFont = loadFont("assets/ReenieBeanie-Regular.ttf");
 
-  prologueVideo = createVideo("assets/Prologue.mp4");
+  prologueVideo = createVideo("assets/Prologue.mp4"); //reference [4], [5]
   prologueVideo.hide();
   // auto-skip to game if the video can't load or play (codec/browser issue)
   prologueVideo.elt.onerror = () => {
